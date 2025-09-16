@@ -1,0 +1,15 @@
+##Backlog Sprint 1
+
+| Fonctionnalité               | Critères                              | Tâches techniques                                                 | Estimation | Responsable |
+| ---------------------------- | ------------------------------------- | ----------------------------------------------------------------- | ---------- | ----------- |
+| Déplacer le héros            | 4 directions, mouvements visibles     | Créer classe `Heros`, méthode `deplacer()`, lier touches          | 3 pts      | Maram       |
+| Placement aléatoire monstres | Sur cases libres                      | Classe `Monstre`, méthode `placerAleatoirement()`                 | 2 pts      | Maram       |
+| Héros ne traverse pas murs   | Collision bloquée sur murs            | Ajouter méthode `verifierCollision()`, intégrer dans `deplacer()` | 2 pts      | Aya         |
+| Détection victoire           | Collision héros/ trésor               | Classe `Tresor`, vérifier collision, message victoire             | 2 pts      | Aya         |
+| Points de vie du héros       | Barre visible, diminue si attaque     | Attribut `pointsDeVie`, fonction `subirDegats()`, affichage       | 3 pts      | Amina       |
+| Affichage du score / PV      | PV visibles, score temporaire         | Affichage des PV et score à l’écran                               | 2 pts      | Amina       |
+| Labyrinthe par défaut        | Grille visible, murs et chemins       | Classe `Labyrinthe`, `genererParDefaut()`, afficher grille        | 3 pts      | Ibtissam    |
+| Interface/affichage général  | Affichage héros, monstres, labyrinthe | Intégrer tous les éléments visibles dans la grille                | 2 pts      | Ibtissam    |
+
+
+
