@@ -1,0 +1,15 @@
+# Sprint Retrospective – Sprint 0
+
+## Ce qui s’est bien passé
+- GitHub et Eclipse bien connectés
+- Premier commit/push réussi
+- Projet Java fonctionne
+
+## Ce qui s’est mal passé
+- Configuration initiale Git/Eclipse
+- Problème avec l’authentification GitHub (résolu avec token)
+
+## Décisions pour le sprint suivant
+- Mieux préparer les tâches
+- S’entraîner à utiliser Git (commit, push, pull, tag)
+- Commencer la conception du jeu (diagrammes, règles)
