@@ -9,6 +9,8 @@
 | Points de vie du héros       | Barre visible, diminue si attaque     | Attribut `pointsDeVie`, fonction `subirDegats()`, affichage       | 3 pts      | Amina       |
 | Affichage du score / PV      | PV visibles, score temporaire         | Affichage des PV et score à l’écran                               | 2 pts      | Amina       |
 | Labyrinthe par défaut        | Grille visible, murs et chemins       | Classe `Labyrinthe`, `genererParDefaut()`, afficher grille        | 3 pts      | Ibtissam    |
+
+__HC__: pas vraiment une fonctionnalité, si on ne les affiche pas alors tout le reste est inutile
 | Interface/affichage général  | Affichage héros, monstres, labyrinthe | Intégrer tous les éléments visibles dans la grille                | 2 pts      | Ibtissam    |
 
 
