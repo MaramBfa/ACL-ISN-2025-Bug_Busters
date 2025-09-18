@@ -8,7 +8,7 @@
 | US5 | Avantages des héros                     | Guerrier +vie, Voleur +vitesse, Mage attaque à distance       | Modifier constructeur Heros, implémenter bonus                               | 3 pts      |
 | --- | --------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------  | ---------- |
 Épic 2 – Labyrinthe
-| US   | 			Description                 |				 Critères                                       |					 Tâches                                					   | Estimation |
+| US   | 			Description                       |				 Critères                                       |					 Tâches                                					   | Estimation |
 | ---- | ---------------------------------      | --------------------------------------------------------------| -----------------------------------------------------------------------------|----------  |
 | US6  | Labyrinthe par défaut                  | Génération automatique, murs/chemins/point départ visibles    | Classe Labyrinthe, méthode genererParDefaut(), affichage                     | 3 pts      |
 | US7  | Charger labyrinthe depuis fichier      | Fichier CSV/JSON, affichage correct                           | chargerDepuisFichier(), parser et construire grille                          | 2 pts      |
@@ -39,6 +39,6 @@
 | US   | Description                            | Critères                                                      | Tâches                                                                       | Estimation |
 | ---- | ------------------------------------   | -------------------------------------------------             | ---------------------------------------------------------------------------- | ---------- |
 | US22 | Messages humoristiques quand on perd   | Afficher message humoristique selon cause défaite             | Fonction afficherMessagePerte()                                              | 1 pt       |
-| US23 | Animation ou effet spécial trésor      | Animation ou effet 🎉 quand héros atteint trésor              | Ajouter animation simple ou effet visuel                                     |2 pts      |
+| US23 | Animation ou effet spécial trésor      | Animation ou effet quand héros atteint trésor                 | Ajouter animation simple ou effet visuel                                     |2 pts      |
 | US24 | Mode challenge avec chronomètre        | Chronomètre visible, temps final enregistré                   | Classe Chronometre, afficher temps, enregistrer score                        | 3 pts      |
 | US25 | Système de score                       | Score calculé et affiché à la fin de partie                   | Classe Score, calculer points selon critères, afficher score                 | 2 pts      |
