@@ -8,7 +8,7 @@
 | US5 | Avantages des héros                     | Guerrier +vie, Voleur +vitesse, Mage attaque à distance       | Modifier constructeur Heros, implémenter bonus                               | 3 pts      |
 | --- | --------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------  | ---------- |
 Épic 2 – Labyrinthe
-| US   | 			Description                       |				 Critères                                               |					 Tâches                                					                     | Estimation |
+| US   | 			Description                       |				 Critères                                               | Tâches                                					                     | Estimation |
 | ---- | ---------------------------------      | --------------------------------------------------------------| -----------------------------------------------------------------------------|----------  |
 | US6  | Labyrinthe par défaut                  | Génération automatique, murs/chemins/point départ visibles    | Classe Labyrinthe, méthode genererParDefaut(), affichage                     | 3 pts      |
 | US7  | Charger labyrinthe depuis fichier      | Fichier CSV/JSON, affichage correct                           | chargerDepuisFichier(), parser et construire grille                          | 2 pts      |
