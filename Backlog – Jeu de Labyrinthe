@@ -1,0 +1,44 @@
+Épic 1 – Héros
+|  US | 			Description                       |                   Critères                                    |               Tâches                                                         | Estimation |
+| --- | --------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------  | ---------- |
+| US1 | Déplacer le héros dans le labyrinthe    | 4 directions, mouvements visibles, fluides                    | Classe Heros, méthode deplacer(), liaison clavier, affichage                 | 3 pts      |
+| US2 | Empêcher le héros de traverser les murs | Collision bloquée sur murs                                    | verifierCollision(), intégrer dans deplacer()                                | 2 pts      |
+| US3 | Points de vie du héros                  | Barre de vie visible, perte de vie si attaque, game over si 0 | Attribut pointsDeVie, fonction subirDegats(), affichage barre de vie         | 3 pts      |
+| US4 | Choisir avatar                          | Choix avant le début, avatar avec couleur ou image            | Menu de sélection, associer avatar à Heros                                   | 2 pts      |
+| US5 | Avantages des héros                     | Guerrier +vie, Voleur +vitesse, Mage attaque à distance       | Modifier constructeur Heros, implémenter bonus                               | 3 pts      |
+| --- | --------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------  | ---------- |
+Épic 2 – Labyrinthe
+| US   | 			Description                       |				 Critères                                               | Tâches                                					                     | Estimation |
+| ---- | ---------------------------------      | --------------------------------------------------------------| -----------------------------------------------------------------------------|----------  |
+| US6  | Labyrinthe par défaut                  | Génération automatique, murs/chemins/point départ visibles    | Classe Labyrinthe, méthode genererParDefaut(), affichage                     | 3 pts      |
+| US7  | Charger labyrinthe depuis fichier      | Fichier CSV/JSON, affichage correct                           | chargerDepuisFichier(), parser et construire grille                          | 2 pts      |
+| US8  | Sélection niveau difficulté            | Facile/moyen/difficile, taille et complexité adaptées         | Paramètre niveau dans génération, ajuster murs           	                   | 2 pts      |
+| US9  | Trouver un trésor                      | Collision avec trésor = victoire, message de victoire         | Classe Tresor, détection collision, afficher message                         | 2 pts      |
+| US10 | Cases spéciales                        | Piège -PV, passage secret = téléportation, magie = effet      | Classes CasePiege, CaseMagique, CasePassage, interaction 					           | 3 pts      |
+| US11 | Portails magiques                      | Téléportation vers une autre zone aléatoire                   | Classe Portail, logique de téléportation                 					           | 2 pts      |
+| US12 | Cases bonus                            | Soin, PV, invincibilité temporaire                            | Classe CaseBonus, appliquer effet au héros               					           | 2 pts      |
+| --- | --------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------  | ---------- |
+Épic 3 – Monstres
+| US   | Description                            |                  Critères                                     | Tâches                                                                       | Estimation |
+| ---- | ---------------------------------------|---------------------------------------------------------- ------------------------------------------------------------------------------------------------|
+| US13 | Placement aléatoire                    | Monstres sur cases libres, nombre limité                      | Classe Monstre, méthode placerAleatoirement()                                | 2 pts      |
+| US14 | Déplacement aléatoire                  | Se déplacent toutes les x sec, pas de murs                    | Méthode deplacerAleatoirement(), vérifier collisions                         | 3 pts      |
+| US15 | Déplacement intelligent                | Monstres détectent héros proche et vont vers lui              | Fonction “chasse” si distance < 3 cases                                      | 3 pts      |
+| US16 | Fantômes traversant murs               | Certains monstres ignorent murs                               | Attribut traverseMur = True, logique déplacement spéciale                    | 2 pts      |
+| US17 | Personnalité des monstres              | Noms rigolos, styles différents                               | Attribut nom, style, afficher nom/style                                      | 1 pt       |
+| US18 | Types de monstres                      |Fou = hasard, Sniper = attaque distance,Fantôme = traverse murs| Sous-classes MonstreFou, MonstreSniper, MonstreFantome                       | 3 pts      |
+| --- | --------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------  | ---------- |
+Épic 4 – Attaques
+| US   | Description                            | Critères                                                      | Tâches                                                                       | Estimation |
+| ---- | ----------------------------------     | --------------------------------------------------------------| -------------------------------------------------------- -----------------   | ---------- |
+| US19 | Héros tué au contact                   | Collision = game over                                         | Détection collision héros/monstre, déclencher fin partie                     | 2 pts      |
+| US20 | Attaque au contact                     | Héros peut attaquer monstre adjacent                          | Méthode attaquer(), appliquer dégâts, animation simple                       | 2 pts      |
+| US21 | Attaque à distance                     | Héros peut attaquer case voisine                              | Méthode attaqueDistance(), vérifier présence monstre                         | 2 pts      |
+| --- | --------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------  | ---------- |
+Épic 5 – Expérience utilisateur
+| US   | Description                            | Critères                                                      | Tâches                                                                       | Estimation |
+| ---- | ------------------------------------   | -------------------------------------------------             | ---------------------------------------------------------------------------- | ---------- |
+| US22 | Messages humoristiques quand on perd   | Afficher message humoristique selon cause défaite             | Fonction afficherMessagePerte()                                              | 1 pt       |
+| US23 | Animation ou effet spécial trésor      | Animation ou effet quand héros atteint trésor                 | Ajouter animation simple ou effet visuel                                     |2 pts       |
+| US24 | Mode challenge avec chronomètre        | Chronomètre visible, temps final enregistré                   | Classe Chronometre, afficher temps, enregistrer score                        | 3 pts      |
+| US25 | Système de score                       | Score calculé et affiché à la fin de partie                   | Classe Score, calculer points selon critères, afficher score                 | 2 pts      |
