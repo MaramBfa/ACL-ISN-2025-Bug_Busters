@@ -1,0 +1,57 @@
+<<<<<<< HEAD
+Déplacement du héros:
+      |
+      |-->Le héros peut se déplacer dans 4 directions (haut, bas, gauche, droite).
+	  |
+      |-->Le héros ne peut pas traverser les murs (collision bloquante).
+      |
+      |-->Les déplacements sont visibles et fluides.
+Déplacement et attaque du monstre
+      |
+      |-->Le monstre se déplace automatiquement et de façon aléatoire.
+	  |
+      |-->Si le monstre entre en collision avec le héros, le héros perd des points de vie.
+      |
+      |-->Le jeu se termine si les points de vie du héros tombent à 0.
+Barre de vie et score
+      |
+      |-->Une barre de vie visible affiche les points de vie actuels du héros.
+	  |
+      |-->Une zone de score affiche les points accumulés (par ex. trésors trouvés, monstres battus).
+      |
+      |-->La barre de vie diminue lorsque le héros subit des dégâts.
+      
+      
+      
+      
+      
+      
+=======
+Déplacement du héros:
+      |
+      |-->Le héros peut se déplacer dans 4 directions (haut, bas, gauche, droite).
+	  |
+      |-->Le héros ne peut pas traverser les murs (collision bloquante).
+      |
+      |-->Les déplacements sont visibles et fluides.
+Déplacement et attaque du monstre
+      |
+      |-->Le monstre se déplace automatiquement et de façon aléatoire.
+	  |
+      |-->Si le monstre entre en collision avec le héros, le héros perd des points de vie.
+      |
+      |-->Le jeu se termine si les points de vie du héros tombent à 0.
+Barre de vie et score
+      |
+      |-->Une barre de vie visible affiche les points de vie actuels du héros.
+	  |
+      |-->Une zone de score affiche les points accumulés (par ex. trésors trouvés, monstres battus).
+      |
+      |-->La barre de vie diminue lorsque le héros subit des dégâts.
+      
+      
+      
+      
+      
+      
+>>>>>>> d7c3a95a2ccaa43d0405bf9fe9512c87ee82e3df

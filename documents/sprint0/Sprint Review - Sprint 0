@@ -1,0 +1,14 @@
+Sprint Review – Sprint 0
+
+## Objectifs prévus
+- Mise en place Git et dépôt GitHub
+- Création d’un projet Java
+- Première version du jeu (Hello World)
+
+## Réalisé
+- Dépôt GitHub créé
+- Projet Java Play créé dans Eclipse
+- Classe Hello.java affichant "Bonjour"
+
+## Validation
+- Code compilable et exécutable 
