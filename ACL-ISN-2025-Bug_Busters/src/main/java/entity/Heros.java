@@ -6,6 +6,7 @@ public class Heros {
     private int x, y;   // position du héros en cases
     private String direction;
     private boolean collisionOn;
+    private int score = 0;  // Score initial du héros
 
     public Heros(int startX, int startY) {
         this.x = startX;
@@ -44,5 +45,19 @@ public class Heros {
 
     public void setCollisionOn(boolean collision) {
         this.collisionOn = collision;
+    }
+
+    // ---- Méthodes pour le score ----
+    public void ajouterScore(int points) {
+        score += points;
+    }
+
+    public void enleverScore(int points) {
+        score -= points;
+        if (score < 0) score = 0;
+    }
+
+    public void afficherScore() {
+        System.out.println("Score : " + score);
     }
 }
