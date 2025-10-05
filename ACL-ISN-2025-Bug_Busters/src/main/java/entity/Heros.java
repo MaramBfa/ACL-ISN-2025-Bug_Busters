@@ -1,40 +1,48 @@
 package entity;
 
+import java.awt.event.KeyEvent;
+
 public class Heros {
+    private int x, y;   // position du héros en cases
+    private String direction;
+    private boolean collisionOn;
 
-    public int worldX, worldY;
-    public int speed;
-    public String direction;
-    public boolean collisionOn;
-
-    public Heros() {
-        setDefaultValues();
+    public Heros(int startX, int startY) {
+        this.x = startX;
+        this.y = startY;
+        this.direction = "down";
+        this.collisionOn = false;
     }
 
-    public void setDefaultValues() {
-        worldX = 0; // Position de départ X
-        worldY = 0; // Position de départ Y
-        speed = 2;
-        direction = "down";
-    }
-
-    public void deplacer() {
-        // Déplacer en fonction de la direction
+    // Signature attendue par Maze: deplacer(int keyCode, int gridWidth, int gridHeight)
+    public void deplacer(int keyCode, int gridWidth, int gridHeight) {
         if (!collisionOn) {
-            switch (direction) {
-                case "up":
-                    worldY -= speed;
+            switch (keyCode) {
+                case KeyEvent.VK_UP:
+                    if (y > 0) y--;
+                    direction = "up";
                     break;
-                case "down":
-                    worldY += speed;
+                case KeyEvent.VK_DOWN:
+                    if (y < gridHeight - 1) y++;
+                    direction = "down";
                     break;
-                case "left":
-                    worldX -= speed;
+                case KeyEvent.VK_LEFT:
+                    if (x > 0) x--;
+                    direction = "left";
                     break;
-                case "right":
-                    worldX += speed;
+                case KeyEvent.VK_RIGHT:
+                    if (x < gridWidth - 1) x++;
+                    direction = "right";
                     break;
             }
         }
+    }
+
+    public int getX() { return x; }
+    public int getY() { return y; }
+    public String getDirection() { return direction; }
+
+    public void setCollisionOn(boolean collision) {
+        this.collisionOn = collision;
     }
 }
