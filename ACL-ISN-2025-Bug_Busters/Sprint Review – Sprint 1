@@ -1,0 +1,35 @@
+# Sprint Review – Sprint 1 : Jeu du Labyrinthe
+
+##  Objectif du Sprint
+Mettre en place les fondations du jeu : déplacement du héros dans un labyrinthe, gestion des collisions,
+apparition des monstres,affichage du score et des points de vie, et condition de victoire par la découverte du trésor.
+
+---
+
+## Fonctionnalités réalisées
+
+Déplacement du héros : fonctionnel via la méthode deplacer() dans la classe Heros.
+
+Collisions avec les murs : gérées par la méthode verifierCollision().
+
+Déplacement du monstre : implémenté avec un comportement aléatoire (placerAleatoirement() dans la classe Monstre).
+
+Collision héros / monstre : provoque une perte de points de vie, comme prévu (gestion des PV déjà en place).
+
+Barre de vie : visible et mise à jour en fonction des points de vie du héros.
+
+Labyrinthe par défaut : opérationnel (classe Labyrinthe).
+
+Interface / affichage : considérée comme hors cadre (HC) mais présente sous une forme minimale pour les tests de jeu.
+
+---
+
+## Points clarifiés pendant la review
+
+-Trésor et condition de victoire :le héros gagne la partie lorsqu’il atteint le trésor.
+-Score lié aux actions :Le score n’est pas encore implémenté dans cette version du jeu.
+                        Aucune attribution de points pour les monstres battus (fonctionnalité à venir).
+---
+
+
+
