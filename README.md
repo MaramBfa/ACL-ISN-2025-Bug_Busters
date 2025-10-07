@@ -12,10 +12,11 @@ cd C:\Users\DELL\Desktop\ACL-ISN-2025-Bug_Busters\ACL-ISN-2025-Bug_Busters
 
 Pour compiler le projet il faut executer:
 mvn clean compile
+mvn test
+mvn package
 
 Pour lancer le jeu  il faut executer:
-mvn exec:java
-
+java -jar target/labyrinthe-1.0-SNAPSHOT.jar
 ## Environnement
 - Java JDK 17
 - Eclipse IDE 2025-09 (ou version compatible)
