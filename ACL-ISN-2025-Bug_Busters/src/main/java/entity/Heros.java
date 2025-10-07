@@ -20,18 +20,26 @@ public class Heros {
         if (!collisionOn) {
             switch (keyCode) {
                 case KeyEvent.VK_UP:
-                    if (x > 0 && grille[x - 1][y] != '#') x--; direction = "up"; break;
+                    if (x > 0 && grille[x - 1][y] != '#') x--;
+                    direction = "up";
+                    break;
                 case KeyEvent.VK_DOWN:
-                    if (x < gridHeight - 1 && grille[x + 1][y] != '#') x++; direction = "down"; break;
+                    if (x < gridHeight - 1 && grille[x + 1][y] != '#') x++;
+                    direction = "down";
+                    break;
                 case KeyEvent.VK_LEFT:
-                    if (y > 0 && grille[x][y - 1] != '#') y--; direction = "left"; break;
+                    if (y > 0 && grille[x][y - 1] != '#') y--;
+                    direction = "left";
+                    break;
                 case KeyEvent.VK_RIGHT:
-                    if (y < gridWidth - 1 && grille[x][y + 1] != '#') y++; direction = "right"; break;
+                    if (y < gridWidth - 1 && grille[x][y + 1] != '#') y++;
+                    direction = "right";
+                    break;
             }
         }
     }
 
-    // getters et setters
+    // === Getters et setters ===
     public int getX() { return x; }
     public int getY() { return y; }
     public void setX(int x) { this.x = x; }
@@ -40,14 +48,14 @@ public class Heros {
     public String getDirection() { return direction; }
     public void setCollisionOn(boolean collision) { this.collisionOn = collision; }
 
+    // === Gestion des vies ===
     public int getPointsDeVie() { return pointsDeVie; }
     public void perdreVie() {
-        pointsDeVie--;
-        if (pointsDeVie < 0) pointsDeVie = 0;
-        System.out.println("Héros touché ! Vies restantes : " + pointsDeVie);
+        if (pointsDeVie > 0) pointsDeVie--;
     }
 
+    // === Gestion du score ===
     public void ajouterScore(int points) { score += points; }
     public void enleverScore(int points) { score = Math.max(0, score - points); }
-    public void afficherScore() { System.out.println("Score : " + score); }
+    public int getScore() { return score; }
 }

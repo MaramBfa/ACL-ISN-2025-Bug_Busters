@@ -1,7 +1,8 @@
 package main;
 
-import simple.Position;
 import entity.Heros;
+import entity.Tresor;
+import simple.Position;
 
 import javax.swing.*;
 
@@ -25,13 +26,20 @@ public class Main {
             posMonstre = lab.placerAleatoirement();
         } while (posMonstre.equals(posHero));
 
+        // Placement aléatoire du trésor (différent du héros et du monstre)
+        Position posTresor;
+        do {
+            posTresor = lab.placerAleatoirement();
+        } while (posTresor.equals(posHero) || posTresor.equals(posMonstre));
+        Tresor tresor = new Tresor(posTresor);
+
         // Création de la fenêtre
         JFrame frame = new JFrame("Labyrinthe Aléatoire");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
 
         // Ajout du panel
-        FenetreLabyrinthe panel = new FenetreLabyrinthe(grille, hero, posMonstre);
+        FenetreLabyrinthe panel = new FenetreLabyrinthe(grille, hero, posMonstre, tresor);
         frame.add(panel);
 
         frame.pack();
