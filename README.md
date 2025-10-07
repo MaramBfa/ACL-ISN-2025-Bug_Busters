@@ -10,7 +10,7 @@
 cd C:\Users\DELL\Desktop\ACL-ISN-2025-Bug_Busters\ACL-ISN-2025-Bug_Busters
 
 
-Pour compiler le projet il faut executer:
+--Pour compiler le projet il faut executer:
 mvn clean compile
 
 Pour lancer le jeu  il faut executer:
