@@ -3,10 +3,11 @@ package entity;
 import java.awt.event.KeyEvent;
 
 public class Heros {
-    private int x, y;   // position du héros en cases
+    private int x, y;
     private String direction;
     private boolean collisionOn;
-    private int score = 0;  // Score initial du héros
+    private int score = 0;
+    private int pointsDeVie = 3; // ajout des points de vie
 
     public Heros(int startX, int startY) {
         this.x = startX;
@@ -15,49 +16,38 @@ public class Heros {
         this.collisionOn = false;
     }
 
-    // Signature attendue par Maze: deplacer(int keyCode, int gridWidth, int gridHeight)
-    public void deplacer(int keyCode, int gridWidth, int gridHeight) {
+    public void deplacer(int keyCode, int gridWidth, int gridHeight, char[][] grille) {
         if (!collisionOn) {
             switch (keyCode) {
                 case KeyEvent.VK_UP:
-                    if (y > 0) y--;
-                    direction = "up";
-                    break;
+                    if (x > 0 && grille[x - 1][y] != '#') x--; direction = "up"; break;
                 case KeyEvent.VK_DOWN:
-                    if (y < gridHeight - 1) y++;
-                    direction = "down";
-                    break;
+                    if (x < gridHeight - 1 && grille[x + 1][y] != '#') x++; direction = "down"; break;
                 case KeyEvent.VK_LEFT:
-                    if (x > 0) x--;
-                    direction = "left";
-                    break;
+                    if (y > 0 && grille[x][y - 1] != '#') y--; direction = "left"; break;
                 case KeyEvent.VK_RIGHT:
-                    if (x < gridWidth - 1) x++;
-                    direction = "right";
-                    break;
+                    if (y < gridWidth - 1 && grille[x][y + 1] != '#') y++; direction = "right"; break;
             }
         }
     }
 
+    // getters et setters
     public int getX() { return x; }
     public int getY() { return y; }
+    public void setX(int x) { this.x = x; }
+    public void setY(int y) { this.y = y; }
+
     public String getDirection() { return direction; }
+    public void setCollisionOn(boolean collision) { this.collisionOn = collision; }
 
-    public void setCollisionOn(boolean collision) {
-        this.collisionOn = collision;
+    public int getPointsDeVie() { return pointsDeVie; }
+    public void perdreVie() {
+        pointsDeVie--;
+        if (pointsDeVie < 0) pointsDeVie = 0;
+        System.out.println("Héros touché ! Vies restantes : " + pointsDeVie);
     }
 
-    // ---- Méthodes pour le score ----
-    public void ajouterScore(int points) {
-        score += points;
-    }
-
-    public void enleverScore(int points) {
-        score -= points;
-        if (score < 0) score = 0;
-    }
-
-    public void afficherScore() {
-        System.out.println("Score : " + score);
-    }
+    public void ajouterScore(int points) { score += points; }
+    public void enleverScore(int points) { score = Math.max(0, score - points); }
+    public void afficherScore() { System.out.println("Score : " + score); }
 }
