@@ -1,0 +1,11 @@
+Au cours du Sprint 1, l’équipe a atteint la majorité des objectifs prévus pour le développement du jeu du labyrinthe. Nous avons conçu la structure principale du projet avec les classes Heros, 
+Monstre, Labyrinthe et Tresor, posant ainsi une base solide et cohérente pour la suite du développement.
+
+Le sprint a toutefois connu quelques obstacles techniques : un problème d’installation de Maven sur un poste et une panne d’ordinateur ont ralenti le travail. 
+Ces incidents ont nécessité une réorganisation des tâches entre les membres du groupe,ce qui a permis de maintenir une bonne progression malgré les imprévus.
+
+Sur le plan fonctionnel, les mécaniques essentielles déplacement du héros, gestion des collisions et détection de la victoire sont opérationnelles. 
+En revanche, l’affichage du score, l’amélioration de l’interface graphique et le comportement des monstres restent à finaliser.
+
+Malgré ces limites, le bilan est positif : la base du jeu est stable, le code bien structuré, et l’équipe a renforcé sa maîtrise des outils collaboratifs. 
+Le prochain sprint sera consacré à l’ajout du système de score, des combats et à l’amélioration de l’interface pour enrichir l’expérience de jeu.
