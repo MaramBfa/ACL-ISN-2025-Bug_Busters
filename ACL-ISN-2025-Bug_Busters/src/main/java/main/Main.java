@@ -21,7 +21,7 @@ public class Main {
         Heros hero = new Heros(posHero.x, posHero.y);
 
         // Placement aléatoire du monstre (différent du héros)
-        Position posMonstre;
+        Position posMonstre; 
         do {
             posMonstre = lab.placerAleatoirement();
         } while (posMonstre.equals(posHero));

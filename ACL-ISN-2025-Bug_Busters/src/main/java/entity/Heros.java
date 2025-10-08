@@ -46,7 +46,7 @@ public class Heros {
     public void setY(int y) { this.y = y; }
 
     public String getDirection() { return direction; }
-    public void setCollisionOn(boolean collision) { this.collisionOn = collision; }
+    public void setCollisionOn(boolean collision) { this.collisionOn  = collision; }
 
     // === Gestion des vies ===
     public int getPointsDeVie() { return pointsDeVie; }

@@ -24,10 +24,11 @@ public class FenetreLabyrinthe extends JPanel {
         this.monstre = monstre;
         this.tresor = tresor;
 
-        setPreferredSize(new Dimension(grille[0].length * TAILLE_CASE, grille.length * TAILLE_CASE));
+        // On ajoute un peu plus de hauteur pour la zone HUD (barre de vie + score)
+        setPreferredSize(new Dimension(grille[0].length * TAILLE_CASE, grille.length * TAILLE_CASE + 60));
         setFocusable(true);
 
-        // Déplacement du héros
+        // Déplacement du héros via clavier
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -69,7 +70,7 @@ public class FenetreLabyrinthe extends JPanel {
         if (hero.getX() == monstre.x && hero.getY() == monstre.y) {
             hero.perdreVie();
             if (hero.getPointsDeVie() <= 0) {
-                JOptionPane.showMessageDialog(this, "Game Over !");
+                JOptionPane.showMessageDialog(this, "💀 Game Over !");
                 System.exit(0);
             }
         }
@@ -77,17 +78,17 @@ public class FenetreLabyrinthe extends JPanel {
         // Collision héros-trésor
         if (hero.getX() == tresor.getPos().x && hero.getY() == tresor.getPos().y) {
             hero.ajouterScore(100);
-            JOptionPane.showMessageDialog(this, "Bravo ! Vous avez trouvé le trésor 🎉\nScore final : " + hero.getScore());
+            JOptionPane.showMessageDialog(this, "🎉 Bravo ! Vous avez trouvé le trésor 🎉\nScore final : " + hero.getScore());
             System.exit(0);
         }
     }
 
-    /** Dessin du labyrinthe, héros, monstre, trésor, points de vie et score */
+    /** Dessin du labyrinthe, héros, monstre, trésor, barre de vie et score */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Dessin du labyrinthe
+        // === 1. Labyrinthe ===
         for (int x = 0; x < grille.length; x++) {
             for (int y = 0; y < grille[0].length; y++) {
                 g.setColor(grille[x][y] == '#' ? Color.BLACK : Color.WHITE);
@@ -97,22 +98,36 @@ public class FenetreLabyrinthe extends JPanel {
             }
         }
 
-        // Dessin héros
+        // === 2. Héros ===
         g.setColor(Color.BLUE);
         g.fillOval(hero.getY() * TAILLE_CASE + 5, hero.getX() * TAILLE_CASE + 5, TAILLE_CASE - 10, TAILLE_CASE - 10);
 
-        // Dessin monstre
+        // === 3. Monstre ===
         g.setColor(Color.RED);
         g.fillOval(monstre.y * TAILLE_CASE + 5, monstre.x * TAILLE_CASE + 5, TAILLE_CASE - 10, TAILLE_CASE - 10);
 
-        // Dessin trésor
+        // === 4. Trésor ===
         g.setColor(Color.YELLOW);
         g.fillRect(tresor.getPos().y * TAILLE_CASE + 10, tresor.getPos().x * TAILLE_CASE + 10, TAILLE_CASE - 20, TAILLE_CASE - 20);
 
-        // Affichage points de vie et score
+        // === 5. HUD (barre de vie + score) ===
+        int hudY = grille.length * TAILLE_CASE + 25;
+
+        // Label "Vies"
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, 16));
-        g.drawString("Vies : " + hero.getPointsDeVie(), 10, 20);
-        g.drawString("Score : " + hero.getScore(), 10, 40);
+        g.drawString("Vies :", 10, hudY);
+
+        // Dessiner des cœurs ou barres pour représenter les vies
+        for (int i = 0; i < hero.getPointsDeVie(); i++) {
+            g.setColor(Color.GREEN);
+            g.fillRect(70 + i * 30, hudY - 15, 20, 20);
+            g.setColor(Color.BLACK);
+            g.drawRect(70 + i * 30, hudY - 15, 20, 20);
+        }
+
+        // Afficher le score
+        g.setColor(Color.BLACK);
+        g.drawString("Score : " + hero.getScore(), 10, hudY + 30);
     }
 }
