@@ -1,0 +1,34 @@
+Fonctionnalites
+
+Sélection du niveau avant de jouer
+		|
+		|-->Adapter la taille du labyrinthe selon la difficulté
+		|-->Adapter le nombre de monstres
+Barre de vie et score
+      |
+      |-->Une barre de vie visible affiche les points de vie actuels du héros.
+	  |
+      |-->Une zone de score affiche les points accumulés (par ex. trésors trouvés, monstres battus).
+      |
+      |-->La barre de vie diminue lorsque le héros subit des dégâts.
+      
+Le trésor est enfermé dans une boîte verrouillée                         
+		|
+		|-->Le héros ne peut pas accéder au trésor sans la clé
+		|
+La clé est placée aléatoirement dans le labyrinthe
+		|
+		|-->Le héros doit la trouver pour ouvrir la boîte
+Le fantôme se déplace aléatoirement et traverse les murs
+		|
+		|-->Déplacement toutes les x secondes, ignore les murs
+Le zombie suit le héros s’il est proche
+		|
+		|-->Déplacement vers le héros si distance < 3
+		
+Deux types d’armes sont cachés dans le labyrinthe
+		|
+		|-->Le héros doit les trouver pour pouvoir attaquer
+Le héros ne peut attaquer les monstres que s’il possède une arme
+		|
+		|-->Attaque possible uniquement après collecte d'arme
