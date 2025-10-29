@@ -7,7 +7,9 @@ public class Heros {
     private String direction;
     private boolean collisionOn;
     private int score = 0;
-    private int pointsDeVie = 3; // ajout des points de vie
+    private int pointsDeVie = 3;
+    private WeaponType weapon = null;
+    private boolean hasKey = false;
 
     public Heros(int startX, int startY) {
         this.x = startX;
@@ -16,6 +18,7 @@ public class Heros {
         this.collisionOn = false;
     }
 
+    /** Déplacement du héros selon les touches du clavier */
     public void deplacer(int keyCode, int gridWidth, int gridHeight, char[][] grille) {
         if (!collisionOn) {
             switch (keyCode) {
@@ -39,23 +42,28 @@ public class Heros {
         }
     }
 
-    // === Getters et setters ===
+    // === Getters & setters ===
     public int getX() { return x; }
     public int getY() { return y; }
     public void setX(int x) { this.x = x; }
     public void setY(int y) { this.y = y; }
-
     public String getDirection() { return direction; }
-    public void setCollisionOn(boolean collision) { this.collisionOn  = collision; }
 
-    // === Gestion des vies ===
+    // === Vie ===
     public int getPointsDeVie() { return pointsDeVie; }
-    public void perdreVie() {
-        if (pointsDeVie > 0) pointsDeVie--;
-    }
+    public void perdreVie() { if (pointsDeVie > 0) pointsDeVie--; }
 
-    // === Gestion du score ===
+    // === Score ===
     public void ajouterScore(int points) { score += points; }
     public void enleverScore(int points) { score = Math.max(0, score - points); }
     public int getScore() { return score; }
+
+    // === Arme ===
+    public boolean aUneArme() { return weapon != null; }
+    public void setWeapon(WeaponType w) { weapon = w; }
+    public WeaponType getWeapon() { return weapon; }
+
+    // === Clé ===
+    public boolean hasKey() { return hasKey; }
+    public void pickKey() { hasKey = true; }
 }
