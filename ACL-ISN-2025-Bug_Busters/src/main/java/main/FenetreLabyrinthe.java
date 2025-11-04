@@ -97,17 +97,11 @@ public class FenetreLabyrinthe extends JPanel {
         });
         chronoTimer.start();
 
-        // Déplacement héros + attaque espace
+        // Déplacement héros (sans attaque)
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 hero.deplacer(e.getKeyCode(), grille[0].length, grille.length, grille);
-
-                // Attaque avec la touche Espace
-                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    hero.attaquer(monstres);
-                }
-
                 verifierCollisions();
                 repaint();
             }
@@ -162,15 +156,10 @@ public class FenetreLabyrinthe extends JPanel {
 
         for (Position m : monstres) {
             if (hero.getX() == m.x && hero.getY() == m.y) {
-                if (hero.aUneArme()) {
-                    hero.ajouterScore(50);
-                    m.x = -1; m.y = -1;
-                } else {
-                    hero.perdreVie();
-                    if (hero.getPointsDeVie() <= 0) {
-                        finDePartie("💀 Game Over !\nVoulez-vous rejouer ?", "Défaite");
-                        return;
-                    }
+                hero.perdreVie();
+                if (hero.getPointsDeVie() <= 0) {
+                    finDePartie("💀 Game Over !\nVoulez-vous rejouer ?", "Défaite");
+                    return;
                 }
             }
         }
