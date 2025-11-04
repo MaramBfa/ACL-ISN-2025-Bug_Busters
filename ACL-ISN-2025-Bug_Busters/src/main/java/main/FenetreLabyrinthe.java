@@ -233,8 +233,20 @@ private void verifierCollisions() {
         messageTresorAffiche = false;
     }
 }
+private void finDePartie(String message, String titre) {
+    chronoTimer.stop();
+    timerMonstres.stop();
+    partieTerminee = true;
 
-
+    int choix = JOptionPane.showConfirmDialog(this, message, titre, JOptionPane.YES_NO_OPTION);
+    if (choix == JOptionPane.YES_OPTION) {
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        topFrame.dispose();
+        MenuPrincipal.lancerNouvellePartie();
+    } else {
+        System.exit(0);
+    }
+}
 
     @Override
     protected void paintComponent(Graphics g) {
