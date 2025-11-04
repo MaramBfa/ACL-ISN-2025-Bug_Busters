@@ -65,5 +65,5 @@ public class Heros {
 
     // === Clé ===
     public boolean hasKey() { return hasKey; }
-    public void pickKey() { hasKey = true; }
+    public void pickKey() { hasKey = true; }
 }
