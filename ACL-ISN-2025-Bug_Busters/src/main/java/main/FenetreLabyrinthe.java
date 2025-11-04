@@ -2,7 +2,7 @@ package main;
 
 import entity.*;
 import simple.Position;
-import simple.Difficulty; // ✅ Import ajouté
+import simple.Difficulty;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,21 +26,19 @@ public class FenetreLabyrinthe extends JPanel {
     private final int TAILLE_CASE = 40;
     private Random rand = new Random();
     private boolean partieTerminee = false;
-    private Timer timerMonstres; // remplace le timer local des monstres
+    private Timer timerMonstres;
 
-
-    // 🎨 Couleurs de thème (un seul mur et sol par niveau)
+    // Couleurs selon niveau
     private Color wallColor;
     private Color floorColor;
 
-    // Autres images
+    // Images
     private Image heroImg, monsterImg, ghostImg, zombieImg, keyImg, treasureImg, swordImg, bowImg;
 
     private boolean messageTresorAffiche = false;
     private long startTime;
     private Timer chronoTimer;
     private JLabel chronoLabel;
-
 
     public FenetreLabyrinthe(char[][] grille, Heros hero,
                              ArrayList<Position> monstres,
@@ -57,7 +55,7 @@ public class FenetreLabyrinthe extends JPanel {
         this.fantome = fantome;
         this.zombie = zombie;
 
-        // === Chargement des images des entités ===
+        // Chargement images
         heroImg = loadImage("/images/hero.png");
         monsterImg = loadImage("/images/monster.png");
         ghostImg = loadImage("/images/ghost.png");
@@ -67,50 +65,55 @@ public class FenetreLabyrinthe extends JPanel {
         swordImg = loadImage("/images/sword.png");
         bowImg = loadImage("/images/bow.png");
 
-        // === Couleurs selon la difficulté ===
+        // Couleurs selon difficulté
         switch (difficulty) {
             case EASY -> {
-                wallColor = new Color(180, 220, 180); // vert clair
-                floorColor = new Color(240, 250, 220); // beige
+                wallColor = new Color(180, 220, 180);
+                floorColor = new Color(240, 250, 220);
             }
             case MEDIUM -> {
-                wallColor = new Color(150, 150, 150); // gris
-                floorColor = new Color(200, 200, 200); // gris clair
+                wallColor = new Color(150, 150, 150);
+                floorColor = new Color(200, 200, 200);
             }
             case HARD -> {
-                wallColor = new Color(60, 60, 60); // gris foncé
-                floorColor = new Color(100, 100, 100); // anthracite
+                wallColor = new Color(60, 60, 60);
+                floorColor = new Color(100, 100, 100);
             }
         }
 
-        // === Préparation de la fenêtre ===
+        // Préparation JPanel
         setPreferredSize(new Dimension(grille[0].length * TAILLE_CASE, grille.length * TAILLE_CASE + 60));
         setFocusable(true);
         startTime = System.currentTimeMillis();
         chronoLabel = new JLabel("Temps : 0 sec");
         chronoLabel.setFont(new Font("Arial", Font.BOLD, 16));
         chronoLabel.setForeground(Color.BLUE);
-        setLayout(new BorderLayout()); // nécessaire pour placer le chrono en haut
+        setLayout(new BorderLayout());
         add(chronoLabel, BorderLayout.NORTH);
-        
+
         chronoTimer = new Timer(1000, e -> {
             long elapsed = (System.currentTimeMillis() - startTime) / 1000;
             chronoLabel.setText("Temps : " + elapsed + " sec");
         });
         chronoTimer.start();
 
-
-        // === Déplacement du héros via clavier ===
+        // Déplacement héros + attaque espace
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 hero.deplacer(e.getKeyCode(), grille[0].length, grille.length, grille);
+
+                // Attaque avec la touche Espace
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    hero.attaquer(monstres);
+                }
+
                 verifierCollisions();
                 repaint();
             }
         });
 
-        // === Timer pour mouvement des monstres ===
+        // Timer monstres
         timerMonstres = new Timer(500, e -> {
             if (!partieTerminee) {
                 deplacerMonstres();
@@ -121,13 +124,11 @@ public class FenetreLabyrinthe extends JPanel {
             }
         });
         timerMonstres.start();
-
     }
 
     private Image loadImage(String path) {
         java.net.URL location = getClass().getResource(path);
         if (location == null) {
-            // 🟡 Si l'image est manquante, on renvoie un carré de couleur de secours
             BufferedImage img = new BufferedImage(TAILLE_CASE, TAILLE_CASE, BufferedImage.TYPE_INT_RGB);
             Graphics2D g = img.createGraphics();
             g.setColor(Color.MAGENTA);
@@ -145,7 +146,6 @@ public class FenetreLabyrinthe extends JPanel {
             int dir = rand.nextInt(4);
             int newX = m.x;
             int newY = m.y;
-
             switch (dir) {
                 case 0 -> { if (m.x > 0 && grille[m.x - 1][m.y] != '#') newX--; }
                 case 1 -> { if (m.x < grille.length - 1 && grille[m.x + 1][m.y] != '#') newX++; }
@@ -156,72 +156,91 @@ public class FenetreLabyrinthe extends JPanel {
             m.y = newY;
         }
     }
-private void verifierCollisions() {
-    if (partieTerminee) return;
 
-    for (Position m : monstres) {
-        if (hero.getX() == m.x && hero.getY() == m.y) {
-            if (hero.aUneArme()) {
-                hero.ajouterScore(50);
-                m.x = -1; m.y = -1;
-            } else {
-                hero.perdreVie();
-                if (hero.getPointsDeVie() <= 0) {
-                    finDePartie("💀 Game Over !\nVoulez-vous rejouer ?", "Défaite");
-                    return;
+    private void verifierCollisions() {
+        if (partieTerminee) return;
+
+        for (Position m : monstres) {
+            if (hero.getX() == m.x && hero.getY() == m.y) {
+                if (hero.aUneArme()) {
+                    hero.ajouterScore(50);
+                    m.x = -1; m.y = -1;
+                } else {
+                    hero.perdreVie();
+                    if (hero.getPointsDeVie() <= 0) {
+                        finDePartie("💀 Game Over !\nVoulez-vous rejouer ?", "Défaite");
+                        return;
+                    }
                 }
             }
         }
-    }
 
-    if (hero.getX() == fantome.getPos().x && hero.getY() == fantome.getPos().y) {
-        hero.perdreVie();
-        if (hero.getPointsDeVie() <= 0) {
-            finDePartie("👻 Le fantôme vous a eu !\nVoulez-vous rejouer ?", "Défaite");
-            return;
-        }
-    }
-
-    if (hero.getX() == zombie.getPos().x && hero.getY() == zombie.getPos().y) {
-        hero.perdreVie();
-        if (hero.getPointsDeVie() <= 0) {
-            finDePartie("🧟 Le zombie vous a attrapé !\nVoulez-vous rejouer ?", "Défaite");
-            return;
-        }
-    }
-
-    if (!cle.estRamassee() && hero.getX() == cle.getPos().x && hero.getY() == cle.getPos().y) {
-        cle.ramasser();
-        hero.pickKey();
-        hero.ajouterScore(10);
-    }
-
-    for (Weapon w : armes) {
-        if (!w.estRamassee() && hero.getX() == w.getPos().x && hero.getY() == w.getPos().y) {
-            w.ramasser();
-            hero.setWeapon(w.getType());
-            hero.ajouterScore(20);
-        }
-    }
-
-    if (hero.getX() == tresor.getPos().x && hero.getY() == tresor.getPos().y) {
-        if (!hero.hasKey()) {
-            if (!messageTresorAffiche) {
-                JOptionPane.showMessageDialog(this, "🔒 Le trésor est verrouillé ! Trouvez d'abord la clé.");
-                messageTresorAffiche = true;
+        if (hero.getX() == fantome.getPos().x && hero.getY() == fantome.getPos().y) {
+            hero.perdreVie();
+            if (hero.getPointsDeVie() <= 0) {
+                finDePartie("👻 Le fantôme vous a eu !\nVoulez-vous rejouer ?", "Défaite");
+                return;
             }
-            return;
         }
 
+        if (hero.getX() == zombie.getPos().x && hero.getY() == zombie.getPos().y) {
+            hero.perdreVie();
+            if (hero.getPointsDeVie() <= 0) {
+                finDePartie("🧟 Le zombie vous a attrapé !\nVoulez-vous rejouer ?", "Défaite");
+                return;
+            }
+        }
+
+        if (!cle.estRamassee() && hero.getX() == cle.getPos().x && hero.getY() == cle.getPos().y) {
+            cle.ramasser();
+            hero.pickKey();
+            hero.ajouterScore(10);
+        }
+
+        for (Weapon w : armes) {
+            if (!w.estRamassee() && hero.getX() == w.getPos().x && hero.getY() == w.getPos().y) {
+                w.ramasser();
+                hero.setWeapon(w.getType());
+                hero.ajouterScore(20);
+            }
+        }
+
+        if (hero.getX() == tresor.getPos().x && hero.getY() == tresor.getPos().y) {
+            if (!hero.hasKey()) {
+                if (!messageTresorAffiche) {
+                    JOptionPane.showMessageDialog(this, "🔒 Le trésor est verrouillé ! Trouvez d'abord la clé.");
+                    messageTresorAffiche = true;
+                }
+                return;
+            }
+
+            chronoTimer.stop();
+            timerMonstres.stop();
+            partieTerminee = true;
+
+            long finalTime = (System.currentTimeMillis() - startTime) / 1000;
+            int choix = JOptionPane.showConfirmDialog(this,
+                "🎉 Vous avez gagné en " + finalTime + " secondes !\nScore final : " + hero.getScore() + "\n\nVoulez-vous rejouer ?",
+                "Victoire", JOptionPane.YES_NO_OPTION);
+
+            if (choix == JOptionPane.YES_OPTION) {
+                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                topFrame.dispose();
+                MenuPrincipal.lancerNouvellePartie();
+            } else {
+                System.exit(0);
+            }
+        } else {
+            messageTresorAffiche = false;
+        }
+    }
+
+    private void finDePartie(String message, String titre) {
         chronoTimer.stop();
         timerMonstres.stop();
         partieTerminee = true;
 
-        long finalTime = (System.currentTimeMillis() - startTime) / 1000;
-        int choix = JOptionPane.showConfirmDialog(this,
-            "🎉 Vous avez gagné en " + finalTime + " secondes !\nScore final : " + hero.getScore() + "\n\nVoulez-vous rejouer ?",
-            "Victoire", JOptionPane.YES_NO_OPTION);
-
+        int choix = JOptionPane.showConfirmDialog(this, message, titre, JOptionPane.YES_NO_OPTION);
         if (choix == JOptionPane.YES_OPTION) {
             JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
             topFrame.dispose();
@@ -229,30 +248,13 @@ private void verifierCollisions() {
         } else {
             System.exit(0);
         }
-    } else {
-        messageTresorAffiche = false;
     }
-}
-private void finDePartie(String message, String titre) {
-    chronoTimer.stop();
-    timerMonstres.stop();
-    partieTerminee = true;
-
-    int choix = JOptionPane.showConfirmDialog(this, message, titre, JOptionPane.YES_NO_OPTION);
-    if (choix == JOptionPane.YES_OPTION) {
-        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        topFrame.dispose();
-        MenuPrincipal.lancerNouvellePartie();
-    } else {
-        System.exit(0);
-    }
-}
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // === Dessin du labyrinthe avec couleurs différentes selon le niveau ===
+        // Dessin labyrinthe
         for (int x = 0; x < grille.length; x++) {
             for (int y = 0; y < grille[0].length; y++) {
                 g.setColor(grille[x][y] == '#' ? wallColor : floorColor);
@@ -260,7 +262,7 @@ private void finDePartie(String message, String titre) {
             }
         }
 
-        // === Objets et entités ===
+        // Objets et entités
         if (!cle.estRamassee())
             g.drawImage(keyImg, cle.getPos().y * TAILLE_CASE, cle.getPos().x * TAILLE_CASE, this);
 
@@ -279,7 +281,7 @@ private void finDePartie(String message, String titre) {
         g.drawImage(zombieImg, zombie.getPos().y * TAILLE_CASE, zombie.getPos().x * TAILLE_CASE, this);
         g.drawImage(heroImg, hero.getY() * TAILLE_CASE, hero.getX() * TAILLE_CASE, this);
 
-        // === HUD ===
+        // HUD
         int hudY = grille.length * TAILLE_CASE + 25;
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, 16));
@@ -296,17 +298,4 @@ private void finDePartie(String message, String titre) {
         if (hero.aUneArme()) g.drawString("Arme : " + hero.getWeapon(), 180, hudY + 30);
         if (hero.hasKey()) g.drawString("Clé : ✅", 320, hudY + 30);
     }
-} ce code:addKeyListener(new KeyAdapter() {
-    @Override
-    public void keyPressed(KeyEvent e) {
-        hero.deplacer(e.getKeyCode(), grille[0].length, grille.length, grille);
-
-        // Attaque avec Espace
-        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            hero.attaquer(monstres);
-        }
-
-        verifierCollisions();
-        repaint();
-    }
-});
+}
