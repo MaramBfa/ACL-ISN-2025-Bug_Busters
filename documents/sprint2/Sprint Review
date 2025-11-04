@@ -1,0 +1,27 @@
+Sprint Review – Sprint 2 : Jeu du Labyrinthe (Version Améliorée)
+
+#### Objectif du Sprint
+
+Améliorer le jeu en ajoutant la gestion des niveaux, des armes, des monstres spécifiques (fantôme et zombie),ainsi que l’affichage du score et des points de vie.
+Le but est que le héros puisse se déplacer dans un labyrinthe adapté à la difficulté, récupérer la clé et le trésor,et utiliser des armes pour combattre les monstres.
+
+-----------
+### Fonctionnalités réalisées
+
+Sélection du niveau : adapte la taille du labyrinthe et le nombre de monstres selon la difficulté.
+Barre de vie : visible et diminue lorsque le héros subit des dégâts.
+Score : affichage des points accumulés pour trésor, clé et monstres vaincus si arme.
+Trésor verrouillé : le héros ne peut y accéder sans la clé.
+Clé : placée aléatoirement dans le labyrinthe.
+Fantôme : se déplace aléatoirement et traverse les murs.
+Zombie : suit le héros si distance < 3 cases.
+Armes : deux types cachés dans le labyrinthe.
+Attaque : possible uniquement si le héros possède une arme (touche Espace).
+----------------------
+
+#### Points clarifiés pendant la review 
+
+Le héros doit récupérer la clé pour débloquer le trésor.
+Les monstres spéciaux (fantôme et zombie) ont des comportements distincts.
+L’attaque fonctionne seulement après collecte d’une arme.
+Le score et la barre de vie se mettent à jour en temps réel.
