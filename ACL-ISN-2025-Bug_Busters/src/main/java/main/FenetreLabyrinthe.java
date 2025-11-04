@@ -25,6 +25,9 @@ public class FenetreLabyrinthe extends JPanel {
     private Zombie zombie;
     private final int TAILLE_CASE = 40;
     private Random rand = new Random();
+    private boolean partieTerminee = false;
+    private Timer timerMonstres; // remplace le timer local des monstres
+
 
     // 🎨 Couleurs de thème (un seul mur et sol par niveau)
     private Color wallColor;
@@ -108,14 +111,17 @@ public class FenetreLabyrinthe extends JPanel {
         });
 
         // === Timer pour mouvement des monstres ===
-        Timer timer = new Timer(500, e -> {
-            deplacerMonstres();
-            fantome.move(grille[0].length, grille.length);
-            zombie.moveTowards(new Position(hero.getX(), hero.getY()), grille);
-            verifierCollisions();
-            repaint();
+        timerMonstres = new Timer(500, e -> {
+            if (!partieTerminee) {
+                deplacerMonstres();
+                fantome.move(grille[0].length, grille.length);
+                zombie.moveTowards(new Position(hero.getX(), hero.getY()), grille);
+                verifierCollisions();
+                repaint();
+            }
         });
-        timer.start();
+        timerMonstres.start();
+
     }
 
     private Image loadImage(String path) {
@@ -151,6 +157,8 @@ public class FenetreLabyrinthe extends JPanel {
         }
     }
 private void verifierCollisions() {
+    if (partieTerminee) return;
+
     for (Position m : monstres) {
         if (hero.getX() == m.x && hero.getY() == m.y) {
             if (hero.aUneArme()) {
@@ -159,17 +167,8 @@ private void verifierCollisions() {
             } else {
                 hero.perdreVie();
                 if (hero.getPointsDeVie() <= 0) {
-                    int choix = JOptionPane.showConfirmDialog(this,
-                        "💀 Game Over !\nVoulez-vous rejouer ?",
-                        "Défaite", JOptionPane.YES_NO_OPTION);
-
-                    if (choix == JOptionPane.YES_OPTION) {
-                        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-                        topFrame.dispose();
-                        MenuPrincipal.lancerNouvellePartie();
-                    } else {
-                        System.exit(0);
-                    }
+                    finDePartie("💀 Game Over !\nVoulez-vous rejouer ?", "Défaite");
+                    return;
                 }
             }
         }
@@ -178,34 +177,16 @@ private void verifierCollisions() {
     if (hero.getX() == fantome.getPos().x && hero.getY() == fantome.getPos().y) {
         hero.perdreVie();
         if (hero.getPointsDeVie() <= 0) {
-            int choix = JOptionPane.showConfirmDialog(this,
-                "👻 Le fantôme vous a eu !\nVoulez-vous rejouer ?",
-                "Défaite", JOptionPane.YES_NO_OPTION);
-
-            if (choix == JOptionPane.YES_OPTION) {
-                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-                topFrame.dispose();
-                MenuPrincipal.lancerNouvellePartie();
-            } else {
-                System.exit(0);
-            }
+            finDePartie("👻 Le fantôme vous a eu !\nVoulez-vous rejouer ?", "Défaite");
+            return;
         }
     }
 
     if (hero.getX() == zombie.getPos().x && hero.getY() == zombie.getPos().y) {
         hero.perdreVie();
         if (hero.getPointsDeVie() <= 0) {
-            int choix = JOptionPane.showConfirmDialog(this,
-                "🧟 Le zombie vous a attrapé !\nVoulez-vous rejouer ?",
-                "Défaite", JOptionPane.YES_NO_OPTION);
-
-            if (choix == JOptionPane.YES_OPTION) {
-                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-                topFrame.dispose();
-                MenuPrincipal.lancerNouvellePartie();
-            } else {
-                System.exit(0);
-            }
+            finDePartie("🧟 Le zombie vous a attrapé !\nVoulez-vous rejouer ?", "Défaite");
+            return;
         }
     }
 
@@ -233,8 +214,10 @@ private void verifierCollisions() {
         }
 
         chronoTimer.stop();
-        long finalTime = (System.currentTimeMillis() - startTime) / 1000;
+        timerMonstres.stop();
+        partieTerminee = true;
 
+        long finalTime = (System.currentTimeMillis() - startTime) / 1000;
         int choix = JOptionPane.showConfirmDialog(this,
             "🎉 Vous avez gagné en " + finalTime + " secondes !\nScore final : " + hero.getScore() + "\n\nVoulez-vous rejouer ?",
             "Victoire", JOptionPane.YES_NO_OPTION);
@@ -250,6 +233,7 @@ private void verifierCollisions() {
         messageTresorAffiche = false;
     }
 }
+
 
 
     @Override
