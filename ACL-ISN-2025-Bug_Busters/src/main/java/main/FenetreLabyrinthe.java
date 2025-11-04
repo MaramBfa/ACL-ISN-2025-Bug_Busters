@@ -34,6 +34,10 @@ public class FenetreLabyrinthe extends JPanel {
     private Image heroImg, monsterImg, ghostImg, zombieImg, keyImg, treasureImg, swordImg, bowImg;
 
     private boolean messageTresorAffiche = false;
+    private long startTime;
+    private Timer chronoTimer;
+    private JLabel chronoLabel;
+
 
     public FenetreLabyrinthe(char[][] grille, Heros hero,
                              ArrayList<Position> monstres,
