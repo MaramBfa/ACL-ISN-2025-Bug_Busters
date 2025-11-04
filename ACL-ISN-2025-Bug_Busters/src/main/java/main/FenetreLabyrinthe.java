@@ -159,8 +159,17 @@ private void verifierCollisions() {
             } else {
                 hero.perdreVie();
                 if (hero.getPointsDeVie() <= 0) {
-                    JOptionPane.showMessageDialog(this, "💀 Game Over !");
-                    System.exit(0);
+                    int choix = JOptionPane.showConfirmDialog(this,
+                        "💀 Game Over !\nVoulez-vous rejouer ?",
+                        "Défaite", JOptionPane.YES_NO_OPTION);
+
+                    if (choix == JOptionPane.YES_OPTION) {
+                        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                        topFrame.dispose();
+                        MenuPrincipal.lancerNouvellePartie();
+                    } else {
+                        System.exit(0);
+                    }
                 }
             }
         }
@@ -169,16 +178,34 @@ private void verifierCollisions() {
     if (hero.getX() == fantome.getPos().x && hero.getY() == fantome.getPos().y) {
         hero.perdreVie();
         if (hero.getPointsDeVie() <= 0) {
-            JOptionPane.showMessageDialog(this, "👻 Le fantôme vous a eu !");
-            System.exit(0);
+            int choix = JOptionPane.showConfirmDialog(this,
+                "👻 Le fantôme vous a eu !\nVoulez-vous rejouer ?",
+                "Défaite", JOptionPane.YES_NO_OPTION);
+
+            if (choix == JOptionPane.YES_OPTION) {
+                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                topFrame.dispose();
+                MenuPrincipal.lancerNouvellePartie();
+            } else {
+                System.exit(0);
+            }
         }
     }
 
     if (hero.getX() == zombie.getPos().x && hero.getY() == zombie.getPos().y) {
         hero.perdreVie();
         if (hero.getPointsDeVie() <= 0) {
-            JOptionPane.showMessageDialog(this, "🧟 Le zombie vous a attrapé !");
-            System.exit(0);
+            int choix = JOptionPane.showConfirmDialog(this,
+                "🧟 Le zombie vous a attrapé !\nVoulez-vous rejouer ?",
+                "Défaite", JOptionPane.YES_NO_OPTION);
+
+            if (choix == JOptionPane.YES_OPTION) {
+                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                topFrame.dispose();
+                MenuPrincipal.lancerNouvellePartie();
+            } else {
+                System.exit(0);
+            }
         }
     }
 
@@ -205,18 +232,25 @@ private void verifierCollisions() {
             return;
         }
 
-        chronoTimer.stop(); // ⏱️ Arrête le chrono
+        chronoTimer.stop();
         long finalTime = (System.currentTimeMillis() - startTime) / 1000;
 
-        hero.ajouterScore(100);
-        JOptionPane.showMessageDialog(this,
-            "🎉 Vous avez gagné en " + finalTime + " secondes !\nScore final : " + hero.getScore(),
-            "Victoire", JOptionPane.INFORMATION_MESSAGE);
-        System.exit(0);
+        int choix = JOptionPane.showConfirmDialog(this,
+            "🎉 Vous avez gagné en " + finalTime + " secondes !\nScore final : " + hero.getScore() + "\n\nVoulez-vous rejouer ?",
+            "Victoire", JOptionPane.YES_NO_OPTION);
+
+        if (choix == JOptionPane.YES_OPTION) {
+            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            topFrame.dispose();
+            MenuPrincipal.lancerNouvellePartie();
+        } else {
+            System.exit(0);
+        }
     } else {
         messageTresorAffiche = false;
     }
 }
+
 
     @Override
     protected void paintComponent(Graphics g) {
