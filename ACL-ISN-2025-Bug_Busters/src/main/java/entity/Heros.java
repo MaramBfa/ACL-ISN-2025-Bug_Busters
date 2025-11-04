@@ -1,7 +1,6 @@
 package entity;
 
 import java.awt.event.KeyEvent;
-import java.util.List;
 
 public class Heros {
     private int x, y;
@@ -67,44 +66,4 @@ public class Heros {
     // === Clé ===
     public boolean hasKey() { return hasKey; }
     public void pickKey() { hasKey = true; }
-
-    // === Attaque ===
-    public boolean attaquer(List<Position> monstres) {
-        if (!aUneArme()) return false; // Pas d'arme → pas d’attaque
-
-        int targetX = x;
-        int targetY = y;
-
-        switch (direction) {
-            case "up" -> targetX--;
-            case "down" -> targetX++;
-            case "left" -> targetY--;
-            case "right" -> targetY++;
-        }
-
-        Position monstreTouche = null;
-
-        for (Position m : monstres) {
-            if (weapon == WeaponType.EPEE) {
-                if (m.x == targetX && m.y == targetY) {
-                    monstreTouche = m;
-                    break;
-                }
-            } else if (weapon == WeaponType.ARC) {
-                if (m.x == x || m.y == y) {
-                    monstreTouche = m;
-                    break;
-                }
-            }
-        }
-
-        if (monstreTouche != null) {
-            monstres.remove(monstreTouche);
-            ajouterScore(50);
-            System.out.println(" Monstre éliminé !");
-            return true;
-        }
-
-        return false;
-    }
 }
