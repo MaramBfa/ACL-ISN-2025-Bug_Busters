@@ -133,7 +133,7 @@ public class FenetreLabyrinthe extends JPanel {
             g.setColor(Color.MAGENTA);
             g.fillRect(0, 0, TAILLE_CASE, TAILLE_CASE);
             g.dispose();
-            System.err.println("⚠ Image introuvable : " + path);
+            System.err.println("⚠️ Image introuvable : " + path);
             return img;
         }
         Image img = new ImageIcon(location).getImage();
@@ -294,6 +294,19 @@ private void finDePartie(String message, String titre) {
 
         g.drawString("Score : " + hero.getScore(), 10, hudY + 30);
         if (hero.aUneArme()) g.drawString("Arme : " + hero.getWeapon(), 180, hudY + 30);
-        if (hero.hasKey()) g.drawString("Clé : ✅", 320, hudY + 30);
-    }
-}
+        if (hero.hasKey()) g.drawString("Clé : ✅", 320, hudY + 30);
+    }
+} ce code:addKeyListener(new KeyAdapter() {
+    @Override
+    public void keyPressed(KeyEvent e) {
+        hero.deplacer(e.getKeyCode(), grille[0].length, grille.length, grille);
+
+        // Attaque avec Espace
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            hero.attaquer(monstres);
+        }
+
+        verifierCollisions();
+        repaint();
+    }
+});
