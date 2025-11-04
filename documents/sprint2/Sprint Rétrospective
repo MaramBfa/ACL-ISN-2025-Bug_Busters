@@ -1,0 +1,14 @@
+print Rétrospective – Sprint 2 : Jeu du Labyrinthe
+
+Au cours du Sprint 2, l’équipe a implémenté les fonctionnalités principales du gameplay : sélection du niveau, adaptation du labyrinthe et du nombre de monstres selon la difficulté, barre de vie et score, 
+ainsi que la mécanique de clé et trésor verrouillé.
+
+Le déplacement du héros, la collecte des armes et de la clé, ainsi que l’interaction avec le trésor fonctionnent correctement. Le fantôme se déplace aléatoirement et traverse les murs,
+tandis que le zombie suit le héros lorsqu’il est proche.
+
+Quelques obstacles ont été rencontrés : gestion des collisions multiples et synchronisation des timers pour les monstres et entités, ce qui a nécessité plusieurs ajustements dans le code.
+
+Malgré ces difficultés, l’équipe a réussi à stabiliser le gameplay et à rendre toutes les interactions jouables. La structure du code reste claire et modulaire, ce qui facilite l’ajout de futures fonctionnalités.
+
+Le bilan est positif : le jeu est jouable avec les nouvelles mécaniques, et l’équipe a renforcé sa maîtrise de la gestion des entités et de l’affichage dynamique. 
+Le prochain sprint sera consacré à l’amélioration de l’interface graphique, ajout de nouvelles armes
