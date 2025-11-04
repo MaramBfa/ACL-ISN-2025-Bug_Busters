@@ -18,12 +18,12 @@ public class MenuPrincipal extends JFrame {
 
         jouerButton.addActionListener(e -> {
             dispose(); // ferme le menu
-            new FenetreLabyrinthe(); // lance le jeu
+            JeuLabyrintheLauncher.lancerJeu(); // lance le jeu
         });
 
         instructionsButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this,
-                "Déplacez-vous avec les flèches du clavier.\nTrouvez la clé et le trésor en évitant les monstres.",
+                "🎯 Objectif : Trouver la clé et le trésor en évitant les monstres.\n🕹️ Utilisez les flèches pour vous déplacer.",
                 "Instructions", JOptionPane.INFORMATION_MESSAGE);
         });
 
