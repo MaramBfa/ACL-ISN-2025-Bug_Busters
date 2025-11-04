@@ -150,78 +150,73 @@ public class FenetreLabyrinthe extends JPanel {
             m.y = newY;
         }
     }
-
-    private void verifierCollisions() {
-        for (Position m : monstres) {
-        if (hero.getX() == tresor.getPos().x && hero.getY() == tresor.getPos().y) {
-            if (!hero.hasKey()) {
-                if (!messageTresorAffiche) {
-                    JOptionPane.showMessageDialog(this, "🔒 Le trésor est verrouillé ! Trouvez d'abord la clé.");
-                    messageTresorAffiche = true;
-                }
-                return;
-            }
-        
-            chronoTimer.stop(); // ⏱️ Arrête le chrono
-            long finalTime = (System.currentTimeMillis() - startTime) / 1000;
-        
-            hero.ajouterScore(100);
-            JOptionPane.showMessageDialog(this,
-                "🎉 Vous avez gagné en " + finalTime + " secondes !\nScore final : " + hero.getScore(),
-                "Victoire", JOptionPane.INFORMATION_MESSAGE);
-            System.exit(0);
-        }
-
+private void verifierCollisions() {
+    for (Position m : monstres) {
+        if (hero.getX() == m.x && hero.getY() == m.y) {
+            if (hero.aUneArme()) {
+                hero.ajouterScore(50);
+                m.x = -1; m.y = -1;
+            } else {
+                hero.perdreVie();
+                if (hero.getPointsDeVie() <= 0) {
+                    JOptionPane.showMessageDialog(this, "💀 Game Over !");
+                    System.exit(0);
                 }
             }
-        }
-
-        if (hero.getX() == fantome.getPos().x && hero.getY() == fantome.getPos().y) {
-            hero.perdreVie();
-            if (hero.getPointsDeVie() <= 0) {
-                JOptionPane.showMessageDialog(this, "👻 Le fantôme vous a eu !");
-                System.exit(0);
-            }
-        }
-
-        if (hero.getX() == zombie.getPos().x && hero.getY() == zombie.getPos().y) {
-            hero.perdreVie();
-            if (hero.getPointsDeVie() <= 0) {
-                JOptionPane.showMessageDialog(this, "🧟 Le zombie vous a attrapé !");
-                System.exit(0);
-            }
-        }
-
-        if (!cle.estRamassee() && hero.getX() == cle.getPos().x && hero.getY() == cle.getPos().y) {
-            cle.ramasser();
-            hero.pickKey();
-            hero.ajouterScore(10);
-        }
-
-        for (Weapon w : armes) {
-            if (!w.estRamassee() && hero.getX() == w.getPos().x && hero.getY() == w.getPos().y) {
-                w.ramasser();
-                hero.setWeapon(w.getType());
-                hero.ajouterScore(20);
-            }
-        }
-
-        if (hero.getX() == tresor.getPos().x && hero.getY() == tresor.getPos().y) {
-            if (!hero.hasKey()) {
-                if (!messageTresorAffiche) {
-                    JOptionPane.showMessageDialog(this, "🔒 Le trésor est verrouillé ! Trouvez d'abord la clé.");
-                    messageTresorAffiche = true;
-                }
-                return;
-            }
-
-            hero.ajouterScore(100);
-            JOptionPane.showMessageDialog(this, "🎉 Vous avez gagné ! Score final : " + hero.getScore());
-            System.exit(0);
-        } else {
-            messageTresorAffiche = false;
         }
     }
+
+    if (hero.getX() == fantome.getPos().x && hero.getY() == fantome.getPos().y) {
+        hero.perdreVie();
+        if (hero.getPointsDeVie() <= 0) {
+            JOptionPane.showMessageDialog(this, "👻 Le fantôme vous a eu !");
+            System.exit(0);
+        }
+    }
+
+    if (hero.getX() == zombie.getPos().x && hero.getY() == zombie.getPos().y) {
+        hero.perdreVie();
+        if (hero.getPointsDeVie() <= 0) {
+            JOptionPane.showMessageDialog(this, "🧟 Le zombie vous a attrapé !");
+            System.exit(0);
+        }
+    }
+
+    if (!cle.estRamassee() && hero.getX() == cle.getPos().x && hero.getY() == cle.getPos().y) {
+        cle.ramasser();
+        hero.pickKey();
+        hero.ajouterScore(10);
+    }
+
+    for (Weapon w : armes) {
+        if (!w.estRamassee() && hero.getX() == w.getPos().x && hero.getY() == w.getPos().y) {
+            w.ramasser();
+            hero.setWeapon(w.getType());
+            hero.ajouterScore(20);
+        }
+    }
+
+    if (hero.getX() == tresor.getPos().x && hero.getY() == tresor.getPos().y) {
+        if (!hero.hasKey()) {
+            if (!messageTresorAffiche) {
+                JOptionPane.showMessageDialog(this, "🔒 Le trésor est verrouillé ! Trouvez d'abord la clé.");
+                messageTresorAffiche = true;
+            }
+            return;
+        }
+
+        chronoTimer.stop(); // ⏱️ Arrête le chrono
+        long finalTime = (System.currentTimeMillis() - startTime) / 1000;
+
+        hero.ajouterScore(100);
+        JOptionPane.showMessageDialog(this,
+            "🎉 Vous avez gagné en " + finalTime + " secondes !\nScore final : " + hero.getScore(),
+            "Victoire", JOptionPane.INFORMATION_MESSAGE);
+        System.exit(0);
+    } else {
+        messageTresorAffiche = false;
+    }
+}
 
     @Override
     protected void paintComponent(Graphics g) {
