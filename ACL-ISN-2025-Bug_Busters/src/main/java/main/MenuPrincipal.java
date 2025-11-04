@@ -33,6 +33,12 @@ public class MenuPrincipal extends JFrame {
         add(instructionsButton);
         add(quitterButton);
     }
+    public static void lancerNouvellePartie() {
+    SwingUtilities.invokeLater(() -> {
+        MenuPrincipal menu = new MenuPrincipal();
+        menu.setVisible(true);
+    });
+}
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MenuPrincipal().setVisible(true));
