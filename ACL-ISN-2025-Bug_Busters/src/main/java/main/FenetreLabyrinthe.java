@@ -1,4 +1,4 @@
-package main;
+ package main;
 
 import entity.*;
 import simple.Position;
@@ -17,7 +17,7 @@ public class FenetreLabyrinthe extends JPanel {
 
     private char[][] grille;
     private Heros hero;
-    private ArrayList<Position> monstres;
+    private ArrayList<Position> monstres; 
     private ArrayList<Weapon> armes;
     private Cle cle;
     private Tresor tresor;
@@ -83,6 +83,19 @@ public class FenetreLabyrinthe extends JPanel {
         // === Préparation de la fenêtre ===
         setPreferredSize(new Dimension(grille[0].length * TAILLE_CASE, grille.length * TAILLE_CASE + 60));
         setFocusable(true);
+        startTime = System.currentTimeMillis();
+        chronoLabel = new JLabel("Temps : 0 sec");
+        chronoLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        chronoLabel.setForeground(Color.BLUE);
+        setLayout(new BorderLayout()); // nécessaire pour placer le chrono en haut
+        add(chronoLabel, BorderLayout.NORTH);
+        
+        chronoTimer = new Timer(1000, e -> {
+            long elapsed = (System.currentTimeMillis() - startTime) / 1000;
+            chronoLabel.setText("Temps : " + elapsed + " sec");
+        });
+        chronoTimer.start();
+
 
         // === Déplacement du héros via clavier ===
         addKeyListener(new KeyAdapter() {
