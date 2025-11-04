@@ -153,16 +153,25 @@ public class FenetreLabyrinthe extends JPanel {
 
     private void verifierCollisions() {
         for (Position m : monstres) {
-            if (hero.getX() == m.x && hero.getY() == m.y) {
-                if (hero.aUneArme()) {
-                    hero.ajouterScore(50);
-                    m.x = -1; m.y = -1;
-                } else {
-                    hero.perdreVie();
-                    if (hero.getPointsDeVie() <= 0) {
-                        JOptionPane.showMessageDialog(this, "💀 Game Over !");
-                        System.exit(0);
-                    }
+        if (hero.getX() == tresor.getPos().x && hero.getY() == tresor.getPos().y) {
+            if (!hero.hasKey()) {
+                if (!messageTresorAffiche) {
+                    JOptionPane.showMessageDialog(this, "🔒 Le trésor est verrouillé ! Trouvez d'abord la clé.");
+                    messageTresorAffiche = true;
+                }
+                return;
+            }
+        
+            chronoTimer.stop(); // ⏱️ Arrête le chrono
+            long finalTime = (System.currentTimeMillis() - startTime) / 1000;
+        
+            hero.ajouterScore(100);
+            JOptionPane.showMessageDialog(this,
+                "🎉 Vous avez gagné en " + finalTime + " secondes !\nScore final : " + hero.getScore(),
+                "Victoire", JOptionPane.INFORMATION_MESSAGE);
+            System.exit(0);
+        }
+
                 }
             }
         }
