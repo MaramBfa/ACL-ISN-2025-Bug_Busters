@@ -28,11 +28,9 @@ public class FenetreLabyrinthe extends JPanel {
     private boolean partieTerminee = false;
     private Timer timerMonstres;
 
-    // Couleurs selon niveau
     private Color wallColor;
     private Color floorColor;
 
-    // Images
     private Image heroImg, monsterImg, ghostImg, zombieImg, keyImg, treasureImg, swordImg, bowImg;
 
     private boolean messageTresorAffiche = false;
@@ -97,7 +95,7 @@ public class FenetreLabyrinthe extends JPanel {
         });
         chronoTimer.start();
 
-        // Déplacement héros (sans attaque)
+        // Déplacement héros
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -154,16 +152,27 @@ public class FenetreLabyrinthe extends JPanel {
     private void verifierCollisions() {
         if (partieTerminee) return;
 
-        for (Position m : monstres) {
+        // === Héros rencontre un monstre ===
+        for (int i = 0; i < monstres.size(); i++) {
+            Position m = monstres.get(i);
+
             if (hero.getX() == m.x && hero.getY() == m.y) {
-                hero.perdreVie();
-                if (hero.getPointsDeVie() <= 0) {
-                    finDePartie("💀 Game Over !\nVoulez-vous rejouer ?", "Défaite");
-                    return;
+                if (hero.aUneArme()) {
+                    hero.ajouterScore(50);
+                    monstres.remove(i);
+                    i--;
+                    JOptionPane.showMessageDialog(this, "💥 Monstre vaincu ! +50 points");
+                } else {
+                    hero.perdreVie();
+                    if (hero.getPointsDeVie() <= 0) {
+                        finDePartie("💀 Game Over !\nVoulez-vous rejouer ?", "Défaite");
+                        return;
+                    }
                 }
             }
         }
 
+        // === Collisions spéciales ===
         if (hero.getX() == fantome.getPos().x && hero.getY() == fantome.getPos().y) {
             hero.perdreVie();
             if (hero.getPointsDeVie() <= 0) {
@@ -180,6 +189,7 @@ public class FenetreLabyrinthe extends JPanel {
             }
         }
 
+        // === Clé et armes ===
         if (!cle.estRamassee() && hero.getX() == cle.getPos().x && hero.getY() == cle.getPos().y) {
             cle.ramasser();
             hero.pickKey();
@@ -194,6 +204,7 @@ public class FenetreLabyrinthe extends JPanel {
             }
         }
 
+        // === Trésor ===
         if (hero.getX() == tresor.getPos().x && hero.getY() == tresor.getPos().y) {
             if (!hero.hasKey()) {
                 if (!messageTresorAffiche) {
@@ -207,9 +218,12 @@ public class FenetreLabyrinthe extends JPanel {
             timerMonstres.stop();
             partieTerminee = true;
 
+            // 🏆 Ajout des 200 points
+            hero.ajouterScore(200);
+
             long finalTime = (System.currentTimeMillis() - startTime) / 1000;
             int choix = JOptionPane.showConfirmDialog(this,
-                "🎉 Vous avez gagné en " + finalTime + " secondes !\nScore final : " + hero.getScore() + "\n\nVoulez-vous rejouer ?",
+                "🎉 Vous avez gagné en " + finalTime + " secondes !\n+200 points bonus 🎁\nScore final : " + hero.getScore() + "\n\nVoulez-vous rejouer ?",
                 "Victoire", JOptionPane.YES_NO_OPTION);
 
             if (choix == JOptionPane.YES_OPTION) {
@@ -243,7 +257,7 @@ public class FenetreLabyrinthe extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Dessin labyrinthe
+        // Dessin du labyrinthe
         for (int x = 0; x < grille.length; x++) {
             for (int y = 0; y < grille[0].length; y++) {
                 g.setColor(grille[x][y] == '#' ? wallColor : floorColor);
