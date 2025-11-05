@@ -15,6 +15,10 @@ public class Monstre {
         } while (x == heroX && y == heroY);
         position = new Point(x, y);
     }
+    public void tuer() {
+    position.x = -1;
+    position.y = -1;
+}
 
     public Point getPosition() { return position; }
 
