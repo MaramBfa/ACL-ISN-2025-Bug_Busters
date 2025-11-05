@@ -38,6 +38,8 @@ public class FenetreLabyrinthe extends JPanel {
     private Timer chronoTimer;
     private JLabel chronoLabel;
 
+    private boolean zombieVivant = true;
+
     public FenetreLabyrinthe(char[][] grille, Heros hero,
                              ArrayList<Position> monstres,
                              Cle cle, Tresor tresor,
@@ -110,7 +112,7 @@ public class FenetreLabyrinthe extends JPanel {
             if (!partieTerminee) {
                 deplacerMonstres();
                 fantome.move(grille[0].length, grille.length);
-                zombie.moveTowards(new Position(hero.getX(), hero.getY()), grille);
+                if (zombieVivant) zombie.moveTowards(new Position(hero.getX(), hero.getY()), grille);
                 verifierCollisions();
                 repaint();
             }
@@ -126,7 +128,7 @@ public class FenetreLabyrinthe extends JPanel {
             g.setColor(Color.MAGENTA);
             g.fillRect(0, 0, TAILLE_CASE, TAILLE_CASE);
             g.dispose();
-            System.err.println("⚠️ Image introuvable : " + path);
+            System.err.println("⚠ Image introuvable : " + path);
             return img;
         }
         Image img = new ImageIcon(location).getImage();
@@ -152,16 +154,15 @@ public class FenetreLabyrinthe extends JPanel {
     private void verifierCollisions() {
         if (partieTerminee) return;
 
-        // === Héros rencontre un monstre ===
+        // === Héros rencontre un monstre normal ===
         for (int i = 0; i < monstres.size(); i++) {
             Position m = monstres.get(i);
-
             if (hero.getX() == m.x && hero.getY() == m.y) {
                 if (hero.aUneArme()) {
                     hero.ajouterScore(50);
                     monstres.remove(i);
                     i--;
-                    JOptionPane.showMessageDialog(this, "💥 Monstre vaincu ! +50 points");
+                    JOptionPane.showMessageDialog(this, "💥 Monstre éliminé ! +50 points");
                 } else {
                     hero.perdreVie();
                     if (hero.getPointsDeVie() <= 0) {
@@ -172,30 +173,39 @@ public class FenetreLabyrinthe extends JPanel {
             }
         }
 
-        // === Collisions spéciales ===
+        // === Collision avec le zombie (peut être tué) ===
+        if (zombieVivant && hero.getX() == zombie.getPos().x && hero.getY() == zombie.getPos().y) {
+            if (hero.aUneArme()) {
+                zombieVivant = false;
+                hero.ajouterScore(50);
+                JOptionPane.showMessageDialog(this, "🧟 Zombie éliminé ! +50 points");
+            } else {
+                hero.perdreVie();
+                if (hero.getPointsDeVie() <= 0) {
+                    finDePartie("🧟 Le zombie vous a attrapé !\nVoulez-vous rejouer ?", "Défaite");
+                    return;
+                }
+            }
+        }
+
+        // === Collision avec le fantôme (invincible) ===
         if (hero.getX() == fantome.getPos().x && hero.getY() == fantome.getPos().y) {
             hero.perdreVie();
+            JOptionPane.showMessageDialog(this, "👻 Le fantôme est invincible ! Vous perdez une vie !");
             if (hero.getPointsDeVie() <= 0) {
                 finDePartie("👻 Le fantôme vous a eu !\nVoulez-vous rejouer ?", "Défaite");
                 return;
             }
         }
 
-        if (hero.getX() == zombie.getPos().x && hero.getY() == zombie.getPos().y) {
-            hero.perdreVie();
-            if (hero.getPointsDeVie() <= 0) {
-                finDePartie("🧟 Le zombie vous a attrapé !\nVoulez-vous rejouer ?", "Défaite");
-                return;
-            }
-        }
-
-        // === Clé et armes ===
+        // === Ramassage clé ===
         if (!cle.estRamassee() && hero.getX() == cle.getPos().x && hero.getY() == cle.getPos().y) {
             cle.ramasser();
             hero.pickKey();
             hero.ajouterScore(10);
         }
 
+        // === Ramassage armes ===
         for (Weapon w : armes) {
             if (!w.estRamassee() && hero.getX() == w.getPos().x && hero.getY() == w.getPos().y) {
                 w.ramasser();
@@ -217,8 +227,6 @@ public class FenetreLabyrinthe extends JPanel {
             chronoTimer.stop();
             timerMonstres.stop();
             partieTerminee = true;
-
-            // 🏆 Ajout des 200 points
             hero.ajouterScore(200);
 
             long finalTime = (System.currentTimeMillis() - startTime) / 1000;
@@ -257,7 +265,7 @@ public class FenetreLabyrinthe extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Dessin du labyrinthe
+        // Dessin labyrinthe
         for (int x = 0; x < grille.length; x++) {
             for (int y = 0; y < grille[0].length; y++) {
                 g.setColor(grille[x][y] == '#' ? wallColor : floorColor);
@@ -277,11 +285,15 @@ public class FenetreLabyrinthe extends JPanel {
         g.drawImage(treasureImg, tresor.getPos().y * TAILLE_CASE, tresor.getPos().x * TAILLE_CASE, this);
 
         for (Position m : monstres)
-            if (m.x >= 0 && m.y >= 0)
-                g.drawImage(monsterImg, m.y * TAILLE_CASE, m.x * TAILLE_CASE, this);
+            g.drawImage(monsterImg, m.y * TAILLE_CASE, m.x * TAILLE_CASE, this);
 
+        // Fantôme toujours affiché (invincible)
         g.drawImage(ghostImg, fantome.getPos().y * TAILLE_CASE, fantome.getPos().x * TAILLE_CASE, this);
-        g.drawImage(zombieImg, zombie.getPos().y * TAILLE_CASE, zombie.getPos().x * TAILLE_CASE, this);
+
+        // Zombie affiché uniquement s’il est encore vivant
+        if (zombieVivant)
+            g.drawImage(zombieImg, zombie.getPos().y * TAILLE_CASE, zombie.getPos().x * TAILLE_CASE, this);
+
         g.drawImage(heroImg, hero.getY() * TAILLE_CASE, hero.getX() * TAILLE_CASE, this);
 
         // HUD
@@ -299,6 +311,6 @@ public class FenetreLabyrinthe extends JPanel {
 
         g.drawString("Score : " + hero.getScore(), 10, hudY + 30);
         if (hero.aUneArme()) g.drawString("Arme : " + hero.getWeapon(), 180, hudY + 30);
-        if (hero.hasKey()) g.drawString("Clé : ✅", 320, hudY + 30);
-    }
+        if (hero.hasKey()) g.drawString("Clé : ✅", 320, hudY + 30);
+    }
 }
