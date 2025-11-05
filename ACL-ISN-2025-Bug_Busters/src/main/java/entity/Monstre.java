@@ -5,6 +5,7 @@ import java.util.Random;
 
 public class Monstre {
     private Point position;
+    private boolean estVivant = true;
     private Random rand = new Random();
 
     public Monstre(int gridWidth, int gridHeight, int heroX, int heroY) {
@@ -15,14 +16,23 @@ public class Monstre {
         } while (x == heroX && y == heroY);
         position = new Point(x, y);
     }
-    public void tuer() {
-    position.x = -1;
-    position.y = -1;
-}
 
-    public Point getPosition() { return position; }
+    public Point getPosition() {
+        return position;
+    }
+
+    public boolean estVivant() {
+        return estVivant;
+    }
+
+    public void tuer() {
+        estVivant = false;
+        position.x = -1;
+        position.y = -1;
+    }
 
     public void move(int gridWidth, int gridHeight) {
+        if (!estVivant) return;
         int dir = rand.nextInt(4);
         switch (dir) {
             case 0: if (position.y > 0) position.y--; break;
