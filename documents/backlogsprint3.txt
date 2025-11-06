@@ -1,0 +1,44 @@
+								Backlog Sprint 3
+ 1. Structure évolutive du jeu
+Objectif : transformer le jeu en progression par niveaux
+
+[ ] Créer un système de niveaux (10 niveaux fixes)
+
+[ ] Ajouter une porte à chaque niveau que le joueur doit ouvrir avec une clé pour qu'il puisse passer au niveau suivant
+
+[ ] Placer le grand trésor uniquement au dernier niveau
+
+[ ] Adapter le nombre de monstres et de murs selon le niveau
+
+[ ] Fixer la taille du labyrinthe (plus de génération aléatoire)
+
+
+2. Objet de récupération de vie
+Objectif : permettre au joueur de regagner des points de vie
+
+[ ] Ajouter un objet (cœur) dans le labyrinthe
+
+[ ] Définir une logique de ramassage et de gain de vie
+
+[ ] Ajouter un effet visuel ou sonore lors de la récupération
+
+3. Système d’attaque amélioré
+Objectif : rendre le combat plus stratégique et interactif
+
+[ ] Ajouter une touche dédiée pour attaquer (Entrée)
+
+[ ] Différencier les armes :
+
+	Épée → attaque de proximité
+
+	Arc → attaque à distance
+4. Carte globale
+Objectif : suivre la progression du joueur dans le jeu 
+
+[ ]Les 10 niveaux sous forme de cercles
+
+[ ]Le niveau actuel du héros (en rouge)
+
+[ ]Le trésor final (niveau 10, en doré)
+
+[ ]Les niveaux déjà franchis (en gris)
