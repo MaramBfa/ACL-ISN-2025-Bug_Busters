@@ -1,7 +1,7 @@
 package simple;
 
 public class Position {
-    public int x, y;
+    public int x, y; // x=ligne, y=colonne
 
     public Position(int x, int y) {
         this.x = x;
@@ -9,20 +9,15 @@ public class Position {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Position)) return false;
-        Position other = (Position) obj;
-        return this.x == other.x && this.y == other.y;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Position position = (Position) o;
+        return x == position.x && y == position.y;
     }
 
     @Override
     public int hashCode() {
         return 31 * x + y;
-    }
-
-    @Override
-    public String toString() {
-        return "(" + x + "," + y + ")";
     }
 }

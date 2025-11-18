@@ -1,5 +1,5 @@
 package entity;
 
 public enum WeaponType {
-    EPEE, ARC
+    AUCUNE, EPEE, ARC  // Ajout de AUCUNE pour l'état initial
 }

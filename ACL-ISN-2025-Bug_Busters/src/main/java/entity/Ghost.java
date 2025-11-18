@@ -11,13 +11,22 @@ public class Ghost {
 
     public Position getPos() { return pos; }
 
-    public void move(int width, int height) {
+    public void move(int width, int height, char[][] grille) {
         int dir = rand.nextInt(4);
+        int newX = pos.x;
+        int newY = pos.y;
+        
         switch (dir) {
-            case 0 -> pos.x = (pos.x - 1 + height) % height;
-            case 1 -> pos.x = (pos.x + 1) % height;
-            case 2 -> pos.y = (pos.y - 1 + width) % width;
-            case 3 -> pos.y = (pos.y + 1) % width;
+            case 0 -> newX--; // Haut
+            case 1 -> newX++; // Bas
+            case 2 -> newY--; // Gauche
+            case 3 -> newY++; // Droite
+        }
+        
+        // Vérification : dans les limites ET pas un mur
+        if (newX >= 0 && newX < height && newY >= 0 && newY < width && grille[newX][newY] != '#') {
+            pos.x = newX;
+            pos.y = newY;
         }
     }
 }

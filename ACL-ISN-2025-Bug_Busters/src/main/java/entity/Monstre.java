@@ -1,30 +1,29 @@
 package entity;
 
-import java.awt.Point;
+import simple.Position;
 import java.util.Random;
 
 public class Monstre {
-    private Point position;
+    private Position position;
     private Random rand = new Random();
 
+    public Monstre(Position pos) {
+        this.position = pos;
+    }
+    
     public Monstre(int gridWidth, int gridHeight, int heroX, int heroY) {
+        Random rand = new Random();
         int x, y;
         do {
-            x = rand.nextInt(gridWidth);
-            y = rand.nextInt(gridHeight);
+            x = rand.nextInt(gridHeight);
+            y = rand.nextInt(gridWidth);
         } while (x == heroX && y == heroY);
-        position = new Point(x, y);
+        position = new Position(x, y);
     }
 
-    public Point getPosition() { return position; }
+    public Position getPosition() { return position; }
 
     public void move(int gridWidth, int gridHeight) {
-        int dir = rand.nextInt(4);
-        switch (dir) {
-            case 0: if (position.y > 0) position.y--; break;
-            case 1: if (position.y < gridHeight - 1) position.y++; break;
-            case 2: if (position.x > 0) position.x--; break;
-            case 3: if (position.x < gridWidth - 1) position.x++; break;
-        }
+        // La logique de déplacement est gérée par FenetreLabyrinthe.deplacerMonstres()
     }
 }
