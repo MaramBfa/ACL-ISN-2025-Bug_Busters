@@ -140,11 +140,11 @@ public class FenetreLabyrinthe extends JPanel {
 
                 int key = e.getKeyCode();
 
-                // 1) Attaque à l'épée (ESPACE) - une seule utilisation
+                // 1) Attaque ÉPÉE (ESPACE)
                 if (key == KeyEvent.VK_SPACE) {
                     if (hero.peutUtiliserEpee()) {
                         attaquerEpee();
-                        hero.consommerEpee(); // usage consommé même si ça rate
+                        hero.consommerEpee();
                     } else if (hero.aEpee()) {
                         setMessageHUD("🗡️ Tu as déjà utilisé ton épée !");
                     } else {
@@ -154,13 +154,13 @@ public class FenetreLabyrinthe extends JPanel {
                     return;
                 }
 
-                // 2) Préparation de l'arc (T)
+                // 2) Préparation Arc (T)
                 if (key == KeyEvent.VK_T) {
                     if (hero.peutUtiliserArc()) {
                         bowAiming = true;
-                        setMessageHUD("🏹 Arc prêt : choisis une direction (Z/Q/S/D)");
+                        setMessageHUD("🏹 Direction (Z/Q/S/D)");
                     } else if (hero.aArc()) {
-                        setMessageHUD("🏹 Tu as déjà utilisé ton arc !");
+                        setMessageHUD("🏹 Arc déjà utilisé !");
                     } else {
                         setMessageHUD("❌ Pas d'arc (T)");
                     }
@@ -168,7 +168,7 @@ public class FenetreLabyrinthe extends JPanel {
                     return;
                 }
 
-                // 3) Direction de l'arc après T (Z/Q/S/D)
+                // 3) Direction du tir de l’arc (Z/Q/S/D)
                 if (bowAiming &&
                         (key == KeyEvent.VK_Z ||
                          key == KeyEvent.VK_Q ||
@@ -176,28 +176,26 @@ public class FenetreLabyrinthe extends JPanel {
                          key == KeyEvent.VK_D)) {
 
                     int dx = 0, dy = 0;
-                    if (key == KeyEvent.VK_Z) dx = -1; // haut
-                    if (key == KeyEvent.VK_S) dx = 1;  // bas
-                    if (key == KeyEvent.VK_Q) dy = -1; // gauche
-                    if (key == KeyEvent.VK_D) dy = 1;  // droite
+
+                    if (key == KeyEvent.VK_Z) dx = -1;  // Haut
+                    if (key == KeyEvent.VK_S) dx =  1;  // Bas
+                    if (key == KeyEvent.VK_Q) dy = -1;  // Gauche
+                    if (key == KeyEvent.VK_D) dy =  1;  // Droite
 
                     attaquerArc(dx, dy);
                     hero.consommerArc();
                     bowAiming = false;
+
                     repaint();
                     return;
                 }
 
-                // 4) Déplacement : flèches + ZQSD (quand pas en visée d’arc)
+                // 4) DÉPLACEMENT : UNIQUEMENT AVEC LES FLÈCHES
                 if (!bowAiming &&
                         (key == KeyEvent.VK_UP ||
                          key == KeyEvent.VK_DOWN ||
                          key == KeyEvent.VK_LEFT ||
-                         key == KeyEvent.VK_RIGHT ||
-                         key == KeyEvent.VK_Z ||
-                         key == KeyEvent.VK_Q ||
-                         key == KeyEvent.VK_S ||
-                         key == KeyEvent.VK_D)) {
+                         key == KeyEvent.VK_RIGHT)) {
 
                     hero.deplacer(key, grille[0].length, grille.length, grille);
                     verifierCollisions();
@@ -206,6 +204,7 @@ public class FenetreLabyrinthe extends JPanel {
                 }
             }
         });
+
 
         // Timer de déplacement des monstres + fantôme + zombie
         timerMonstres = new Timer(500, e -> {

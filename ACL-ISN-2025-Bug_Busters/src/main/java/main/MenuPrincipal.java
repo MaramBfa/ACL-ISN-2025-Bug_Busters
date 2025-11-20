@@ -53,7 +53,7 @@ public class MenuPrincipal extends JFrame {
                 + "  - Épée : attaque au corps-à-corps dans une zone d'une case autour de toi\n"
                 + "  - Arc : attaque à distance en ligne droite jusqu'au mur\n\n"
                 + "🎮 CONTRÔLES :\n"
-                + "• Z / Q / S / D ou les flèches : se déplacer\n"
+                + "• ⇧   ⇩   ⇦   ⇨ : se déplacer\n"
                 + "• Barre ESPACE : attaquer avec l'ÉPÉE\n"
                 + "• T puis Z / Q / S / D : tirer une flèche avec l'ARC\n\n"
                 + "👻 ENNEMIS :\n"
