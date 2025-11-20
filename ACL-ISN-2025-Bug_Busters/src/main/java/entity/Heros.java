@@ -3,6 +3,9 @@ package entity;
 import java.awt.event.KeyEvent;
 import main.FenetreLabyrinthe;
 
+/**
+ * Classe Heros – gestion des vies, score, clé et armes (épée + arc).
+ */
 public class Heros {
 
     private int x, y;
@@ -12,13 +15,18 @@ public class Heros {
     private int pointsDeVie = 3;
     private final int MAX_POINTS_DE_VIE = 5;
 
+    // Le héros peut avoir les deux armes séparément
     private boolean aEpee = false;
     private boolean aArc = false;
+
     private int usagesEpeeRestants = 0;
     private int usagesArcRestants = 0;
 
     private boolean hasKey = false;
     private FenetreLabyrinthe fenetreActuelle;
+
+    // Arme actuellement sélectionnée (pour l’attaque / HUD)
+    private WeaponType weaponSelected = WeaponType.NONE;
 
     public Heros(int startX, int startY) {
         this.x = startX;
@@ -27,6 +35,7 @@ public class Heros {
         this.collisionOn = false;
     }
 
+    // Fenêtre actuelle (pour remonter jusqu'au JFrame)
     public void setFenetreActuelle(FenetreLabyrinthe fenetre) {
         this.fenetreActuelle = fenetre;
     }
@@ -35,6 +44,7 @@ public class Heros {
         return fenetreActuelle;
     }
 
+    // Déplacement
     public void deplacer(int keyCode, int gridWidth, int gridHeight, char[][] grille) {
         int HEIGHT = grille.length;
         int WIDTH = grille[0].length;
@@ -42,6 +52,7 @@ public class Heros {
         if (!collisionOn) {
             switch (keyCode) {
 
+                // ZQSD
                 case KeyEvent.VK_Z:
                     if (x > 0 && grille[x - 1][y] != '#') x--;
                     direction = "up";
@@ -59,6 +70,7 @@ public class Heros {
                     direction = "right";
                     break;
 
+                // Flèches
                 case KeyEvent.VK_UP:
                     if (x > 0 && grille[x - 1][y] != '#') x--;
                     direction = "up";
@@ -79,17 +91,21 @@ public class Heros {
         }
     }
 
+    // Getters & setters de base
     public int getX() { return x; }
     public int getY() { return y; }
     public void setX(int x) { this.x = x; }
     public void setY(int y) { this.y = y; }
+
     public String getDirection() { return direction; }
     public void setDirection(String direction) { this.direction = direction; }
 
     public boolean isCollisionOn() { return collisionOn; }
     public void setCollisionOn(boolean collisionOn) { this.collisionOn = collisionOn; }
 
+    // Gestion de la vie
     public int getPointsDeVie() { return pointsDeVie; }
+
     public void setPointsDeVie(int pointsDeVie) {
         this.pointsDeVie = Math.min(pointsDeVie, MAX_POINTS_DE_VIE);
     }
@@ -114,19 +130,27 @@ public class Heros {
         return pointsDeVie > 0;
     }
 
+    // Score
     public void ajouterScore(int points) { score += points; }
     public void enleverScore(int points) { score = Math.max(0, score - points); }
     public int getScore() { return score; }
     public void setScore(int score) { this.score = score; }
 
+    // Armes
     public void ramasserEpee() {
         aEpee = true;
         usagesEpeeRestants = 1;
+        if (weaponSelected == WeaponType.NONE) {
+            weaponSelected = WeaponType.EPEE;
+        }
     }
 
     public void ramasserArc() {
         aArc = true;
         usagesArcRestants = 1;
+        if (weaponSelected == WeaponType.NONE) {
+            weaponSelected = WeaponType.ARC;
+        }
     }
 
     public boolean aEpee() { return aEpee; }
@@ -145,12 +169,28 @@ public class Heros {
 
     public void consommerEpee() {
         if (usagesEpeeRestants > 0) usagesEpeeRestants--;
+        if (usagesEpeeRestants == 0) aEpee = false;
     }
 
     public void consommerArc() {
         if (usagesArcRestants > 0) usagesArcRestants--;
+        if (usagesArcRestants == 0) aArc = false;
     }
 
+    // Arme sélectionnée (utilisée dans FenetreLabyrinthe)
+    public void setWeapon(WeaponType w) {
+        this.weaponSelected = w;
+    }
+
+    public WeaponType getWeapon() {
+        return weaponSelected;
+    }
+
+    public boolean aUneArme() {
+        return weaponSelected != WeaponType.NONE;
+    }
+
+    // Clé & reset
     public boolean hasKey() { return hasKey; }
     public void pickKey() { hasKey = true; }
     public void useKey() { hasKey = false; }
@@ -172,6 +212,7 @@ public class Heros {
         this.aArc = false;
         this.usagesEpeeRestants = 0;
         this.usagesArcRestants = 0;
+        this.weaponSelected = WeaponType.NONE;
     }
 
     public void reinitialiserComplet(int startX, int startY) {
@@ -179,6 +220,7 @@ public class Heros {
         reinitialiserStats();
     }
 
+    // Utilitaires
     public boolean estAPosition(int posX, int posY) {
         return this.x == posX && this.y == posY;
     }
@@ -201,10 +243,11 @@ public class Heros {
     @Override
     public String toString() {
         return String.format(
-            "Heros[(%d,%d), Vie=%d/%d, Score=%d, Epee=%d, Arc=%d, Clé=%s]",
-            x, y, pointsDeVie, MAX_POINTS_DE_VIE, score,
-            usagesEpeeRestants, usagesArcRestants,
-            hasKey ? "OUI" : "NON"
+                "Heros[(%d,%d), Vie=%d/%d, Score=%d, Epee=%d, Arc=%d, Clé=%s, ArmeActive=%s]",
+                x, y, pointsDeVie, MAX_POINTS_DE_VIE, score,
+                usagesEpeeRestants, usagesArcRestants,
+                hasKey ? "OUI" : "NON",
+                weaponSelected
         );
     }
 }
