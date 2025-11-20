@@ -15,16 +15,16 @@ public class Ghost {
         int dir = rand.nextInt(4);
         int newX = pos.x;
         int newY = pos.y;
-        
+
         switch (dir) {
             case 0 -> newX--; // Haut
             case 1 -> newX++; // Bas
             case 2 -> newY--; // Gauche
             case 3 -> newY++; // Droite
         }
-        
-        // Vérification : dans les limites ET pas un mur
-        if (newX >= 0 && newX < height && newY >= 0 && newY < width && grille[newX][newY] != '#') {
+
+        // Le fantôme peut traverser les murs : on ne teste QUE les limites
+        if (newX >= 0 && newX < height && newY >= 0 && newY < width) {
             pos.x = newX;
             pos.y = newY;
         }

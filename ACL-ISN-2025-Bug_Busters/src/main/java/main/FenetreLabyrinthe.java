@@ -3,6 +3,7 @@ package main;
 import entity.*;
 import simple.Position;
 import simple.Level;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -25,41 +26,46 @@ public class FenetreLabyrinthe extends JPanel {
     private ArrayList<Weapon> armes;
     private Cle cle;
     private Door door;
-    private Tresor tresor; 
+    private Tresor tresor;
     private ArrayList<Heart> coeurs;
     private Ghost fantome;
     private Zombie zombie;
+
     private final int TAILLE_CASE = 40;
-    private Level currentLevel; 
+    private Level currentLevel;
     private boolean partieTerminee = false;
-    private Timer timerMonstres;
+
+    private javax.swing.Timer timerMonstres;
+    private javax.swing.Timer chronoTimer;
 
     private Color wallColor;
     private Color floorColor;
 
-    private Image heroImg, monsterImg, ghostImg, zombieImg, keyImg, treasureImg, swordImg, bowImg, heartImg, doorImg; 
-
-    private boolean messageTresorAffiche = false;
-    private long startTime;
-    private Timer chronoTimer;
-    private JLabel chronoLabel;
+    private Image heroImg, monsterImg, ghostImg, zombieImg,
+            keyImg, treasureImg, swordImg, bowImg, heartImg, doorImg;
 
     private boolean zombieVivant = true;
-    
-    // Variables pour gérer les messages et les dégâts
+
+    // HUD & dégâts
     private long dernierDegatTime = 0;
     private static final long DELAI_ENTRE_DEGATS = 1000;
     private StringBuilder messageHUD = new StringBuilder();
     private long messageHUDTime = 0;
     private static final long DUREE_MESSAGE_HUD = 3000;
 
-    // CONSTRUCTEUR CORRIGÉ - AVEC LISTE DE COEURS
+    private long startTime;
+    private JLabel chronoLabel;
+
+    // Tir à l’arc (T puis Z/Q/S/D)
+    private boolean bowAiming = false;
+
     public FenetreLabyrinthe(char[][] grille, Heros hero,
                              ArrayList<Position> monstres,
                              Cle cle, Door door, Tresor tresor,
                              ArrayList<Weapon> armes,
                              Ghost fantome, Zombie zombie,
-                             Level level, ArrayList<Heart> coeurs) { 
+                             Level level, ArrayList<Heart> coeurs) {
+
         this.grille = grille;
         this.hero = hero;
         this.monstres = monstres;
@@ -72,6 +78,8 @@ public class FenetreLabyrinthe extends JPanel {
         this.currentLevel = level;
         this.coeurs = coeurs;
 
+        hero.setFenetreActuelle(this);
+
         // Chargement images
         heroImg = loadImage("/images/hero.png");
         monsterImg = loadImage("/images/monster.png");
@@ -81,84 +89,134 @@ public class FenetreLabyrinthe extends JPanel {
         treasureImg = loadImage("/images/treasure.png");
         swordImg = loadImage("/images/sword.png");
         bowImg = loadImage("/images/bow.png");
-        heartImg = loadImage("/images/Coeur.png"); 
+        heartImg = loadImage("/images/Coeur.png");
         doorImg = loadImage("/images/door.png");
 
         // Couleurs
-        if (level.wallDensity < 0.25) { 
+        if (level.wallDensity < 0.25) {
             wallColor = new Color(180, 220, 180);
             floorColor = new Color(240, 250, 220);
-        } else if (level.wallDensity < 0.35) { 
+        } else if (level.wallDensity < 0.35) {
             wallColor = new Color(150, 150, 150);
             floorColor = new Color(200, 200, 200);
-        } else { 
+        } else {
             wallColor = new Color(60, 60, 60);
             floorColor = new Color(100, 100, 100);
         }
 
-        setPreferredSize(new Dimension(grille[0].length * TAILLE_CASE, grille.length * TAILLE_CASE + 150));
+        setPreferredSize(new Dimension(grille[0].length * TAILLE_CASE,
+                                       grille.length * TAILLE_CASE + 150));
         setFocusable(true);
+        setLayout(new BorderLayout());
+
         startTime = System.currentTimeMillis();
-        chronoLabel = new JLabel("Temps : 0 sec - Cœurs restants: " + getCoeursRestants() + "/" + coeurs.size());
+        chronoLabel = new JLabel("Temps : 0 sec - Cœurs restants: "
+                + getCoeursRestants() + "/" + coeurs.size());
         chronoLabel.setFont(new Font("Arial", Font.BOLD, 16));
         chronoLabel.setForeground(Color.BLUE);
-        setLayout(new BorderLayout());
         add(chronoLabel, BorderLayout.NORTH);
 
-        chronoTimer = new Timer(1000, e -> {
+        chronoTimer = new javax.swing.Timer(1000, e -> {
             long elapsed = (System.currentTimeMillis() - startTime) / 1000;
-            chronoLabel.setText("Temps : " + elapsed + " sec - Cœurs restants: " + getCoeursRestants() + "/" + coeurs.size());
+            chronoLabel.setText("Temps : " + elapsed + " sec - Cœurs restants: "
+                    + getCoeursRestants() + "/" + coeurs.size());
         });
         chronoTimer.start();
 
-        // Déplacement héros / Attaque
+        // Gestion clavier
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (partieTerminee) return;
 
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    attaquer(); 
-                } else {
-                    hero.deplacer(e.getKeyCode(), grille[0].length, grille.length, grille);
-                    verifierCollisions();
-                    verifierSiBloque();
+                int code = e.getKeyCode();
+
+                // 1) Attaque à l'épée (ESPACE) - une seule utilisation
+                if (code == KeyEvent.VK_SPACE) {
+                    if (hero.peutUtiliserEpee()) {
+                        attaquerEpee();
+                        hero.consommerEpee(); // usage consommé même si ça rate
+                    } else if (hero.aEpee()) {
+                        setMessageHUD("🗡️ Tu as déjà utilisé ton épée !");
+                    } else {
+                        setMessageHUD("❌ Pas d'épée (Espace)");
+                    }
+                    repaint();
+                    return;
                 }
+
+                // 2) Préparation de l'arc (T)
+                if (code == KeyEvent.VK_T) {
+                    if (hero.peutUtiliserArc()) {
+                        bowAiming = true;
+                        setMessageHUD("🏹 Arc prêt : choisis une direction (Z/Q/S/D)");
+                    } else if (hero.aArc()) {
+                        setMessageHUD("🏹 Tu as déjà utilisé ton arc !");
+                    } else {
+                        setMessageHUD("❌ Pas d'arc (T)");
+                    }
+                    repaint();
+                    return;
+                }
+
+                // 3) Direction de l'arc après T
+                if (bowAiming &&
+                        (code == KeyEvent.VK_Z ||
+                         code == KeyEvent.VK_Q ||
+                         code == KeyEvent.VK_S ||
+                         code == KeyEvent.VK_D)) {
+
+                    int dx = 0, dy = 0;
+                    if (code == KeyEvent.VK_Z) dx = -1;
+                    if (code == KeyEvent.VK_S) dx = 1;
+                    if (code == KeyEvent.VK_Q) dy = -1;
+                    if (code == KeyEvent.VK_D) dy = 1;
+
+                    attaquerArc(dx, dy);
+                    hero.consommerArc();
+                    bowAiming = false;
+                    repaint();
+                    return;
+                }
+
+                // 4) Déplacement
+                hero.deplacer(code, grille[0].length, grille.length, grille);
+                verifierCollisions();
+                verifierSiBloque();
                 repaint();
             }
         });
 
-        // Timer monstres
-        timerMonstres = new Timer(500, e -> {
+        // Timer monstres + fantôme + zombie
+        timerMonstres = new javax.swing.Timer(500, e -> {
             if (!partieTerminee) {
-                deplacerMonstres(); 
-                fantome.move(grille[0].length, grille.length, grille); 
-                if (zombieVivant) zombie.moveTowards(new Position(hero.getX(), hero.getY()), grille);
+                deplacerMonstres();
+                fantome.move(grille[0].length, grille.length, grille);
+                if (zombieVivant) {
+                    zombie.moveTowards(new Position(hero.getX(), hero.getY()), grille);
+                }
                 verifierCollisions();
                 repaint();
             }
         });
         timerMonstres.start();
     }
-    
-    // CORRECTION : Rendre cette méthode PUBLIC
+
+    // HUD public
     public void setMessageHUD(String message) {
         messageHUD.setLength(0);
         messageHUD.append(message);
         messageHUDTime = System.currentTimeMillis();
     }
 
-    // Méthode pour compter les cœurs restants
     private int getCoeursRestants() {
         int count = 0;
         for (Heart coeur : coeurs) {
-            if (!coeur.estRamassee()) {
-                count++;
-            }
+            if (!coeur.estRamassee()) count++;
         }
         return count;
     }
-    
+
     private Image loadImage(String path) {
         java.net.URL location = getClass().getResource(path);
         if (location == null) {
@@ -173,11 +231,11 @@ public class FenetreLabyrinthe extends JPanel {
         Image img = new ImageIcon(location).getImage();
         return img.getScaledInstance(TAILLE_CASE, TAILLE_CASE, Image.SCALE_SMOOTH);
     }
-    
+
     private void deplacerMonstres() {
         Random rand = new Random();
-        int[] dx = {-1, 1, 0, 0}; 
-        int[] dy = {0, 0, -1, 1}; 
+        int[] dx = {-1, 1, 0, 0};
+        int[] dy = {0, 0, -1, 1};
         int gridHeight = grille.length;
         int gridWidth = grille[0].length;
 
@@ -187,93 +245,130 @@ public class FenetreLabyrinthe extends JPanel {
             int newY = m.y;
 
             int direction = rand.nextInt(4);
-
             newX += dx[direction];
             newY += dy[direction];
 
-            if (newX >= 0 && newX < gridHeight && newY >= 0 && newY < gridWidth && grille[newX][newY] != '#') {
+            if (newX >= 0 && newX < gridHeight &&
+                newY >= 0 && newY < gridWidth &&
+                grille[newX][newY] != '#') {
                 monstres.set(i, new Position(newX, newY));
             }
         }
     }
 
-    private void attaquer() {
-        if (!hero.aUneArme()) {
-            setMessageHUD("❌ Pas d'arme ! (Touche Entrée)");
-            return;
-        }
-
-        int range = (hero.getWeapon() == WeaponType.EPEE) ? 1 : 3; 
-        int targetX;
-        int targetY;
-
+    // --- ATTAQUE ÉPÉE : zone de 1 case autour (et même case) ---
+    private void attaquerEpee() {
+        int hx = hero.getX();
+        int hy = hero.getY();
         boolean cibleTouchee = false;
 
-        for (int i = 1; i <= range; i++) {
-            targetX = hero.getX();
-            targetY = hero.getY();
-
-            switch (hero.getDirection()) {
-                case "up" -> targetX -= i;
-                case "down" -> targetX += i;
-                case "left" -> targetY -= i;
-                case "right" -> targetY += i;
+        ArrayList<Position> aSupprimer = new ArrayList<>();
+        for (Position m : monstres) {
+            int dx = m.x - hx;
+            int dy = m.y - hy;
+            if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
+                aSupprimer.add(m);
+                hero.ajouterScore(50);
+                cibleTouchee = true;
             }
+        }
+        monstres.removeAll(aSupprimer);
 
-            if (targetX < 0 || targetX >= grille.length || targetY < 0 || targetY >= grille[0].length || grille[targetX][targetY] == '#') {
-                break;
+        if (zombieVivant) {
+            int dxZ = zombie.getPos().x - hx;
+            int dyZ = zombie.getPos().y - hy;
+            if (Math.abs(dxZ) <= 1 && Math.abs(dyZ) <= 1) {
+                zombieVivant = false;
+                hero.ajouterScore(50);
+                cibleTouchee = true;
             }
+        }
 
-            // 1. Monstre normal
-            for (int j = 0; j < monstres.size(); j++) {
-                Position m = monstres.get(j);
-                if (targetX == m.x && targetY == m.y) {
-                    monstres.remove(j);
+        int dxF = fantome.getPos().x - hx;
+        int dyF = fantome.getPos().y - hy;
+        if (Math.abs(dxF) <= 1 && Math.abs(dyF) <= 1) {
+            setMessageHUD("👻 Le fantôme est invincible !");
+        }
+
+        if (cibleTouchee) {
+            setMessageHUD("🗡️ Coup d'épée réussi !");
+        } else {
+            setMessageHUD("🗡️ Coup d'épée dans le vide...");
+        }
+    }
+
+    // --- ATTAQUE ARC : ligne droite jusqu’au mur ---
+    private void attaquerArc(int dirX, int dirY) {
+        if (dirX == 0 && dirY == 0) return;
+
+        int x = hero.getX();
+        int y = hero.getY();
+
+        boolean toucheQuelqueChose = false;
+        boolean aToucheMonstre = false;
+        boolean aToucheZombie = false;
+        boolean aToucheFantome = false;
+
+        while (true) {
+            x += dirX;
+            y += dirY;
+
+            if (x < 0 || x >= grille.length || y < 0 || y >= grille[0].length) break;
+            if (grille[x][y] == '#') break;
+
+            // Monstres
+            for (int i = 0; i < monstres.size(); i++) {
+                Position m = monstres.get(i);
+                if (m.x == x && m.y == y) {
+                    monstres.remove(i);
                     hero.ajouterScore(50);
-                    setMessageHUD("💥 Monstre éliminé ! +50 points");
-                    cibleTouchee = true;
-                    break;
+                    toucheQuelqueChose = true;
+                    aToucheMonstre = true;
+                    i--;
                 }
             }
 
-            // 2. Zombie
-            if (!cibleTouchee && zombieVivant && targetX == zombie.getPos().x && targetY == zombie.getPos().y) {
+            // Zombie
+            if (zombieVivant &&
+                zombie.getPos().x == x &&
+                zombie.getPos().y == y) {
                 zombieVivant = false;
                 hero.ajouterScore(50);
-                setMessageHUD("🧟 Zombie éliminé ! +50 points");
-                cibleTouchee = true;
+                toucheQuelqueChose = true;
+                aToucheZombie = true;
             }
 
-            // 3. Fantôme
-            if (!cibleTouchee && targetX == fantome.getPos().x && targetY == fantome.getPos().y) {
-                setMessageHUD("👻 Le fantôme est invincible !");
-                cibleTouchee = true;
-            }
-
-            if (cibleTouchee || hero.getWeapon() == WeaponType.EPEE) {
-                break;
+            // Fantôme (traversé)
+            if (fantome.getPos().x == x && fantome.getPos().y == y) {
+                aToucheFantome = true;
             }
         }
-        
-        if (!cibleTouchee) {
-            setMessageHUD("⚔️ Attaque dans le vide...");
+
+        if (aToucheFantome && !toucheQuelqueChose) {
+            setMessageHUD("👻 La flèche traverse le fantôme sans effet...");
+        } else if (toucheQuelqueChose) {
+            String msg = "🏹 Flèche touchée : ";
+            if (aToucheMonstre) msg += "monstre ";
+            if (aToucheZombie) msg += "zombie ";
+            msg += "! +50 points";
+            setMessageHUD(msg);
+        } else {
+            setMessageHUD("🏹 Flèche perdue dans le labyrinthe...");
         }
     }
 
     private void verifierCollisions() {
         if (partieTerminee) return;
-        
+
         Position heroPos = new Position(hero.getX(), hero.getY());
-        
-        // Vérifier le délai entre les dégâts
+
         long currentTime = System.currentTimeMillis();
         boolean peutPrendreDegat = (currentTime - dernierDegatTime) > DELAI_ENTRE_DEGATS;
-        
-        // Collisions avec les entités hostiles
+
         if (hero.getPointsDeVie() > 0 && peutPrendreDegat) {
             boolean hit = false;
             String typeEnnemi = "";
-            
+
             if (fantome.getPos().equals(heroPos)) {
                 hit = true;
                 typeEnnemi = "fantôme";
@@ -294,10 +389,10 @@ public class FenetreLabyrinthe extends JPanel {
                 hero.perdreVie();
                 hero.enleverScore(10);
                 dernierDegatTime = currentTime;
-                
-                String message = "💔 Touché par " + typeEnnemi + "! -1❤️  Vie: " + hero.getPointsDeVie();
+
+                String message = "💔 Touché par " + typeEnnemi + " ! -1❤️  Vie: " + hero.getPointsDeVie();
                 setMessageHUD(message);
-                
+
                 if (hero.getPointsDeVie() <= 0) {
                     finDePartie("GAME OVER ! Votre héros est à terre.", "Défaite");
                 }
@@ -305,36 +400,52 @@ public class FenetreLabyrinthe extends JPanel {
             }
         }
 
-        // Ramassage des CŒURS (tous les cœurs de la liste)
+        // Cœurs
         for (Heart coeur : coeurs) {
-            if (!coeur.estRamassee() && hero.getX() == coeur.getPos().x && hero.getY() == coeur.getPos().y) {
+            if (!coeur.estRamassee() &&
+                hero.getX() == coeur.getPos().x &&
+                hero.getY() == coeur.getPos().y) {
                 coeur.ramasser();
-                hero.ajouterVie(); 
+                hero.ajouterVie();
                 hero.ajouterScore(10);
-                int coeursRestants = getCoeursRestants();
-                setMessageHUD("❤️ Cœur ramassé ! +1 Vie ! +10 points (" + coeursRestants + " restant(s))");
+                int restants = getCoeursRestants();
+                setMessageHUD("❤️ Cœur ramassé ! +1 Vie ! +10 points (" + restants + " restant(s))");
                 break;
             }
         }
-        
-        if (!cle.estRamassee() && hero.getX() == cle.getPos().x && hero.getY() == cle.getPos().y) {
+
+        // Clé
+        if (!cle.estRamassee() &&
+            hero.getX() == cle.getPos().x &&
+            hero.getY() == cle.getPos().y) {
             cle.ramasser();
             hero.pickKey();
             hero.ajouterScore(10);
             setMessageHUD("🔑 Clé ramassée ! +10 points");
         }
-        
+
+        // Armes : épée et arc peuvent être ramassés tous les deux
         for (Weapon w : armes) {
-            if (!w.estRamassee() && hero.getX() == w.getPos().x && hero.getY() == w.getPos().y) {
+            if (!w.estRamassee() &&
+                hero.getX() == w.getPos().x &&
+                hero.getY() == w.getPos().y) {
+
                 w.ramasser();
-                hero.setWeapon(w.getType());
+                if (w.getType() == WeaponType.EPEE) {
+                    hero.ramasserEpee();
+                    setMessageHUD("🗡️ Épée ramassée ! (1 utilisation)");
+                } else if (w.getType() == WeaponType.ARC) {
+                    hero.ramasserArc();
+                    setMessageHUD("🏹 Arc ramassé ! (1 utilisation)");
+                }
                 hero.ajouterScore(20);
-                setMessageHUD("⚔️ " + w.getType() + " ramassé ! +20 points");
             }
         }
 
-        // Interaction avec la PORTE
-        if (door != null && hero.getX() == door.getPos().x && hero.getY() == door.getPos().y) {
+        // Porte
+        if (door != null &&
+            hero.getX() == door.getPos().x &&
+            hero.getY() == door.getPos().y) {
             if (!hero.hasKey()) {
                 setMessageHUD("🔒 Porte verrouillée ! Trouvez la clé d'abord.");
             } else {
@@ -343,19 +454,21 @@ public class FenetreLabyrinthe extends JPanel {
                 timerMonstres.stop();
                 partieTerminee = true;
                 hero.ajouterScore(50);
-                
+
                 long finalTime = (System.currentTimeMillis() - startTime) / 1000;
                 JeuLabyrintheLauncher.niveauTermine(hero, finalTime);
             }
         }
 
-        // Interaction avec le TRESOR (uniquement niveau 10)
-        if (tresor != null && hero.getX() == tresor.getPos().x && hero.getY() == tresor.getPos().y) {
+        // Trésor
+        if (tresor != null &&
+            hero.getX() == tresor.getPos().x &&
+            hero.getY() == tresor.getPos().y) {
             chronoTimer.stop();
             timerMonstres.stop();
             partieTerminee = true;
             hero.ajouterScore(200);
-            
+
             long finalTime = (System.currentTimeMillis() - startTime) / 1000;
             JeuLabyrintheLauncher.niveauTermine(hero, finalTime);
         }
@@ -364,10 +477,9 @@ public class FenetreLabyrinthe extends JPanel {
     private void verifierSiBloque() {
         Position heroPos = new Position(hero.getX(), hero.getY());
         Set<Position> accessibles = trouverZonesAccessibles(heroPos);
-        
-        // Si le héros est dans une petite zone isolée (moins de 10 cases accessibles)
+
         if (accessibles.size() < 10) {
-            setMessageHUD("💡 Zone restreinte - Explorez les passages!");
+            setMessageHUD("💡 Zone restreinte - Explorez les passages !");
         }
     }
 
@@ -385,7 +497,8 @@ public class FenetreLabyrinthe extends JPanel {
             for (int i = 0; i < 4; i++) {
                 int newR = current.x + dr[i];
                 int newC = current.y + dc[i];
-                if (newR >= 0 && newR < grille.length && newC >= 0 && newC < grille[0].length) {
+                if (newR >= 0 && newR < grille.length &&
+                    newC >= 0 && newC < grille[0].length) {
                     Position neighbor = new Position(newR, newC);
                     if (grille[newR][newC] != '#' && !accessible.contains(neighbor)) {
                         accessible.add(neighbor);
@@ -401,36 +514,28 @@ public class FenetreLabyrinthe extends JPanel {
         timerMonstres.stop();
         chronoTimer.stop();
         partieTerminee = true;
-        
-        // DEBUG
-        System.out.println("🔍 DEBUG - Avant Game Over:");
-        System.out.println("Niveau actuel: " + JeuLabyrintheLauncher.niveauActuel);
-        System.out.println("Dernier niveau: " + JeuLabyrintheLauncher.getDernierNiveauAtteint());
-        
+
         JOptionPane.showMessageDialog(this, message, titre, JOptionPane.ERROR_MESSAGE);
-        
-        // DEBUG
-        System.out.println("🔍 DEBUG - Après Game Over:");
-        System.out.println("Niveau actuel: " + JeuLabyrintheLauncher.niveauActuel);
-        System.out.println("Dernier niveau: " + JeuLabyrintheLauncher.getDernierNiveauAtteint());
-        
-        int choix = JOptionPane.showConfirmDialog(this, "Voulez-vous revenir au menu principal ?", "Fin du Jeu", JOptionPane.YES_NO_OPTION);
+
+        int choix = JOptionPane.showConfirmDialog(this,
+                "Voulez-vous revenir au menu principal ?", "Fin du Jeu",
+                JOptionPane.YES_NO_OPTION);
         if (choix == JOptionPane.YES_OPTION) {
             JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
             parentFrame.dispose();
-            MenuPrincipal.lancerNouvellePartie(); 
+            MenuPrincipal.lancerNouvellePartie();
         } else {
             System.exit(0);
         }
     }
-    
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g;
 
-        // --- 1. Dessin du labyrinthe et des sols ---
+        // Labyrinthe
         for (int i = 0; i < grille.length; i++) {
             for (int j = 0; j < grille[0].length; j++) {
                 g2.setColor(floorColor);
@@ -442,55 +547,77 @@ public class FenetreLabyrinthe extends JPanel {
                 }
             }
         }
-        
-        // --- 2. Dessin des entités ---
-        if (!cle.estRamassee()) { 
-            g2.drawImage(keyImg, cle.getPos().y * TAILLE_CASE, cle.getPos().x * TAILLE_CASE, null); 
+
+        // Clé
+        if (!cle.estRamassee()) {
+            g2.drawImage(keyImg,
+                    cle.getPos().y * TAILLE_CASE,
+                    cle.getPos().x * TAILLE_CASE, null);
         }
-        
-        // PORTE
-        if (door != null) { 
-            g2.drawImage(doorImg, door.getPos().y * TAILLE_CASE, door.getPos().x * TAILLE_CASE, null); 
+
+        // Porte
+        if (door != null) {
+            g2.drawImage(doorImg,
+                    door.getPos().y * TAILLE_CASE,
+                    door.getPos().x * TAILLE_CASE, null);
         }
-        
-        // TRESOR (uniquement niveau 10)
-        if (tresor != null) { 
-            g2.drawImage(treasureImg, tresor.getPos().y * TAILLE_CASE, tresor.getPos().x * TAILLE_CASE, null); 
+
+        // Trésor
+        if (tresor != null) {
+            g2.drawImage(treasureImg,
+                    tresor.getPos().y * TAILLE_CASE,
+                    tresor.getPos().x * TAILLE_CASE, null);
         }
-        
-        // TOUS LES CŒURS
+
+        // Cœurs
         for (Heart coeur : coeurs) {
-            if (!coeur.estRamassee()) { 
-                g2.drawImage(heartImg, coeur.getPos().y * TAILLE_CASE, coeur.getPos().x * TAILLE_CASE, null); 
+            if (!coeur.estRamassee()) {
+                g2.drawImage(heartImg,
+                        coeur.getPos().y * TAILLE_CASE,
+                        coeur.getPos().x * TAILLE_CASE, null);
             }
         }
-        
+
+        // Armes
         for (Weapon w : armes) {
             if (!w.estRamassee()) {
                 Image img = (w.getType() == WeaponType.EPEE) ? swordImg : bowImg;
-                g2.drawImage(img, w.getPos().y * TAILLE_CASE, w.getPos().x * TAILLE_CASE, null);
+                g2.drawImage(img,
+                        w.getPos().y * TAILLE_CASE,
+                        w.getPos().x * TAILLE_CASE, null);
             }
         }
-        
-        for (Position m : monstres) { 
-            g2.drawImage(monsterImg, m.y * TAILLE_CASE, m.x * TAILLE_CASE, null); 
+
+        // Monstres
+        for (Position m : monstres) {
+            g2.drawImage(monsterImg,
+                    m.y * TAILLE_CASE,
+                    m.x * TAILLE_CASE, null);
         }
-        
-        g2.drawImage(ghostImg, fantome.getPos().y * TAILLE_CASE, fantome.getPos().x * TAILLE_CASE, null);
-        
-        if (zombieVivant) { 
-            g2.drawImage(zombieImg, zombie.getPos().y * TAILLE_CASE, zombie.getPos().x * TAILLE_CASE, null); 
+
+        // Fantôme
+        g2.drawImage(ghostImg,
+                fantome.getPos().y * TAILLE_CASE,
+                fantome.getPos().x * TAILLE_CASE, null);
+
+        // Zombie
+        if (zombieVivant) {
+            g2.drawImage(zombieImg,
+                    zombie.getPos().y * TAILLE_CASE,
+                    zombie.getPos().x * TAILLE_CASE, null);
         }
-        
-        g2.drawImage(heroImg, hero.getY() * TAILLE_CASE, hero.getX() * TAILLE_CASE, null);
-        
-        // --- 3. HUD amélioré ---
+
+        // Héros
+        g2.drawImage(heroImg,
+                hero.getY() * TAILLE_CASE,
+                hero.getX() * TAILLE_CASE, null);
+
+        // HUD
         int hudY = grille.length * TAILLE_CASE + 30;
         g2.setColor(Color.BLACK);
         g2.setFont(new Font("Arial", Font.BOLD, 14));
         g2.drawString("Score : " + hero.getScore(), 10, hudY);
-        
-        // Barre de vie visuelle
+
         g2.drawString("Vie : ", 150, hudY);
         for (int i = 0; i < 5; i++) {
             if (i < hero.getPointsDeVie()) {
@@ -500,24 +627,28 @@ public class FenetreLabyrinthe extends JPanel {
             g2.setColor(Color.BLACK);
             g2.drawRect(190 + i * 15, hudY - 12, 12, 12);
         }
-        
-        String armeStr = hero.aUneArme() ? hero.getWeapon().toString() : "Aucune";
-        g2.drawString("Arme : " + armeStr, 300, hudY);
-        g2.drawString("Clé : " + (hero.hasKey() ? "🔑" : "❌"), 450, hudY);
-        g2.drawString("Cœurs: " + getCoeursRestants() + "/" + coeurs.size(), 520, hudY);
-        
-        // Affichage des messages dans le HUD
-        if (messageHUD.length() > 0 && (System.currentTimeMillis() - messageHUDTime) < DUREE_MESSAGE_HUD) {
+
+        // Affichage des armes et usages restants
+        String armeStr = "Épée: " + hero.getUsagesEpeeRestants()
+                       + " | Arc: " + hero.getUsagesArcRestants();
+        g2.drawString("Armes : " + armeStr, 300, hudY);
+
+        g2.drawString("Clé : " + (hero.hasKey() ? "🔑" : "❌"), 520, hudY);
+        g2.drawString("Cœurs: " + getCoeursRestants() + "/" + coeurs.size(), 600, hudY);
+
+        // Message HUD
+        if (messageHUD.length() > 0 &&
+            (System.currentTimeMillis() - messageHUDTime) < DUREE_MESSAGE_HUD) {
             g2.setColor(new Color(0, 0, 0, 200));
             g2.fillRect(10, hudY + 20, getWidth() - 20, 25);
             g2.setColor(Color.YELLOW);
             g2.setFont(new Font("Arial", Font.BOLD, 12));
             g2.drawString(messageHUD.toString(), 20, hudY + 37);
         }
-        
+
         dessinerCarteGlobale(g, hudY + 50);
     }
-    
+
     private void dessinerCarteGlobale(Graphics g, int mapY) {
         Level[] allLevels = Level.values();
         int currentLevelIndex = Arrays.asList(allLevels).indexOf(currentLevel);
@@ -528,12 +659,12 @@ public class FenetreLabyrinthe extends JPanel {
         g.drawString("Progression :", mapX, mapY - 5);
 
         for (int i = 0; i < allLevels.length; i++) {
-            if (i < currentLevelIndex) { 
-                g.setColor(Color.LIGHT_GRAY); 
-            } else if (i == currentLevelIndex) { 
-                g.setColor(Color.RED); 
-            } else { 
-                g.setColor(Color.DARK_GRAY); 
+            if (i < currentLevelIndex) {
+                g.setColor(Color.LIGHT_GRAY);
+            } else if (i == currentLevelIndex) {
+                g.setColor(Color.RED);
+            } else {
+                g.setColor(Color.DARK_GRAY);
             }
 
             g.fillOval(mapX + i * (circleSize + 10) + 70, mapY, circleSize, circleSize);
@@ -541,16 +672,18 @@ public class FenetreLabyrinthe extends JPanel {
             g.drawOval(mapX + i * (circleSize + 10) + 70, mapY, circleSize, circleSize);
 
             if (i == allLevels.length - 1) {
-                g.setColor(new Color(255, 215, 0)); 
-                g.fillRect(mapX + i * (circleSize + 10) + 70 + 5, mapY + 5, circleSize - 10, circleSize - 10);
+                g.setColor(new Color(255, 215, 0));
+                g.fillRect(mapX + i * (circleSize + 10) + 75,
+                           mapY + 5, circleSize - 10, circleSize - 10);
             }
 
             g.setColor(Color.WHITE);
-            g.drawString(String.valueOf(i + 1), mapX + i * (circleSize + 10) + 70 + 4, mapY + 14);
+            g.drawString(String.valueOf(i + 1),
+                    mapX + i * (circleSize + 10) + 70 + 4, mapY + 14);
         }
     }
 
-    // Getters pour les tests
+    // Getters
     public Heros getHero() { return hero; }
     public ArrayList<Position> getMonstres() { return monstres; }
     public boolean isZombieVivant() { return zombieVivant; }
