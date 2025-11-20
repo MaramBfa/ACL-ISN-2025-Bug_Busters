@@ -1,0 +1,10 @@
+Sprint Rétrospective – Sprint 3 : Jeu du Labyrinthe
+
+Le Sprint 3 a permis de transformer le jeu en une expérience de progression complète avec 10 niveaux. L'équipe a implémenté avec succès le système porte/clé, 
+les cœurs de vie et l'adaptation dynamique de la difficulté.
+
+Les défis principaux ont concerné la garantie d'accessibilité des labyrinthes et la persistance de la progression entre les parties. 
+Deux fonctionnalités restent à finaliser : la touche Entrée pour l'attaque et la carte de progression visuelle.
+
+Malgré ces retards, la base de code reste solide et modulaire. Le jeu offre désormais une expérience engageante avec une progression bien équilibrée.
+Le prochain sprint se concentrera sur la finalisation des features manquantes et l'enrichissement de l'interface.
