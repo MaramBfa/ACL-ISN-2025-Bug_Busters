@@ -4,29 +4,27 @@ Transformer le jeu en progression par niveaux avec 10 niveaux fixes, ajouter des
 avec des armes différenciées, et implémenter une carte de progression visuelle.
 
 
-##################################
-Fonctionnalités réalisées:
 
--Système de niveaux évolutif : 10 niveaux fixes avec difficulté progressive, taille de labyrinthe fixe.
--Porte et clé : à chaque niveau (sauf niveau 10), le héros doit trouver la clé pour ouvrir la porte et passer au niveau suivant.
+✅Fonctionnalités réalisées:
+
+-Système de niveaux évolutif : 10 niveaux fixes avec difficulté progressive, taille de labyrinthe constante.
+-Porte et clé : aux niveaux 1 à 9, le héros doit trouver la clé pour ouvrir la porte et passer au niveau suivant.
 -Trésor final : uniquement accessible au niveau 10 après collecte de la clé.
 -Adaptation des ennemis et murs : nombre de monstres et densité des murs augmentent avec les niveaux.
 -Cœurs de vie : objets placés dans le labyrinthe (1 à 5 par niveau selon la progression).
 -Récupération de vie : ramassage automatique avec gain immédiat de points de vie .
--Système d’attaque amélioré : touche Entrée dédiée pour attaquer, différenciation épée (proximité) et arc (distance).
+-Système d’attaque amélioré : différenciation entre épée (attaque de proximité) et arc (attaque à distance).
 -Carte de progression : les 10 niveaux affichés en cercles.
 
 
-
-Fonctionnalités non réalisées:
+⏳Fonctionnalités non réalisées:
 
 -Touche dédiée pour attaquer : la touche Entrée n'est pas implémentée pour l'attaque.
 
-########################################
-Points clarifiés pendant la review
+🔎Points clarifiés pendant la review
 
-Le héros doit trouver la clé pour ouvrir la porte et progresser au niveau suivant (niveaux 1-9).
-Le trésor final au niveau 10 nécessite également la clé pour être accessible.
-Les cœurs de vie permettent de regagner des points de vie jusqu'à un maximum de 5.
-L'attaque est possible seulement si le héros a une arme, avec portée adaptée (épée : 1 case, arc : 3 cases).
-Le nombre de monstres et la densité des murs s'adaptent automatiquement au niveau.
+-Le héros doit trouver la clé pour ouvrir la porte et progresser au niveau suivant (niveaux 1-9).
+-Le trésor final au niveau 10 nécessite également la clé pour être accessible.
+-Les cœurs de vie permettent de regagner des points de vie jusqu'à un maximum de 5.
+-L'attaque est possible seulement si le héros a une arme, avec portée adaptée (épée : 1 case, arc : 3 cases).
+-Le nombre de monstres et la densité des murs s'adaptent automatiquement au niveau.
