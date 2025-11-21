@@ -26,3 +26,6 @@ Nouveaux objets et mécaniques
 Héros plus vivant
 
 	-Changement de direction de vue : sprite du héros qui s’oriente selon la direction (haut, bas, gauche, droite).
+
+Ajouter des tests unitaires 
+
