@@ -1,0 +1,27 @@
+
+Nouveau comportement du monstre 
+
+	-Coopération : deux monstres qui se déplacent ensemble pour piéger le héros.
+
+Capacités spéciales
+
+	-Monstre qui vole la clé : oblige le joueur à le vaincre pour récupérer l’accès au niveau suivant mais que a partir du 8eme niveau .
+
+Effets visuels et sonores
+
+	-Animation d’attaque : griffes, projectiles ou aura lumineuse.
+
+	-Effets sonores : rugissement quand ils apparaissent, bruit de pas quand ils approchent.
+
+Niveau 10
+
+	-Boss final : au niveau 10, un monstre plus grand avec plusieurs phases d’attaque.
+	-Bombe : une bombe qu'au niveau 10 pour attaquer ce big monstre
+
+Nouveaux objets et mécaniques
+
+	-Potion magique d’invincibilité : annule les collisions avec tous les monstres pendant 5 secondes.
+	-pièges : ralentissement si le joueur marche sur un piège.
+
+Héros plus vivant
+	-Changement de direction de vue : sprite du héros qui s’oriente selon la direction (haut, bas, gauche, droite).
