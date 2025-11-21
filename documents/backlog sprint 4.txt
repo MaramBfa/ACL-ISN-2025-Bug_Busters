@@ -21,7 +21,8 @@ Niveau 10
 Nouveaux objets et mécaniques
 
 	-Potion magique d’invincibilité : annule les collisions avec tous les monstres pendant 5 secondes.
-	-pièges : ralentissement si le joueur marche sur un piège.
+	-piège : ralentissement si le joueur marche sur un piège.
 
 Héros plus vivant
+
 	-Changement de direction de vue : sprite du héros qui s’oriente selon la direction (haut, bas, gauche, droite).
