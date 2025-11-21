@@ -12,6 +12,8 @@ Réalisé :
     
     HUD amélioré 
 
+    Contrôle supplémentaire (touche Entrée pour attaque)
+
 Défis rencontrés :
 
     Collisions et équilibre de difficulté
@@ -20,9 +22,6 @@ Défis rencontrés :
     
     Lisibilité de la carte de progression
 
-À finaliser :
-
-    Contrôle supplémentaire (touche Entrée pour attaque)
 
 Prochain Sprint :
 
@@ -31,3 +30,5 @@ Prochain Sprint :
     Améliorer l'interface 
     
     Ajouter animations pour immersion
+
+    Ajouter des effets sonores
