@@ -6,7 +6,7 @@ et l’implémentation d’une carte de progression visuelle.
 
 
 
-✅Fonctionnalités réalisées:
+Fonctionnalités réalisées:
 
 -Système de niveaux évolutif : 10 niveaux fixes avec difficulté progressive, taille de labyrinthe constante.
 -Porte et clé : aux niveaux 1 à 9, le héros doit trouver la clé pour ouvrir la porte et passer au niveau suivant.
@@ -16,17 +16,14 @@ et l’implémentation d’une carte de progression visuelle.
 -Récupération de vie : ramassage automatique avec gain immédiat de points de vie .
 -Système d’attaque amélioré : différenciation entre épée (attaque de proximité) et arc (attaque à distance).
 -Carte de progression : les 10 niveaux affichés en cercles.
+-Touche dédiée pour attaquer : la touche Espace pour l'attaque avec l'épée et T+ZQSD pour l'attaque avec l'arc.
 
 
-⏳Fonctionnalités non réalisées:
 
--Touche dédiée pour attaquer : la touche Entrée n'est pas implémentée pour l'attaque.
-
-
-🔎Points clarifiés pendant la review
+Points clarifiés pendant la review
 
 -Le héros doit trouver la clé pour ouvrir la porte et progresser au niveau suivant (niveaux 1-9).
 -Le trésor final au niveau 10 nécessite également la clé pour être accessible.
 -Les cœurs de vie permettent de regagner des points de vie jusqu'à un maximum de 5.
--L'attaque est possible seulement si le héros a une arme, avec portée adaptée (épée : 1 case, arc : 3 cases).
+-L'attaque est possible seulement si le héros a une arme, avec portée adaptée (épée : 1 case, jusqu'à la rencontre d'un mur).
 -Le nombre de monstres et la densité des murs s'adaptent automatiquement au niveau.
