@@ -6,13 +6,13 @@ Réalisé :
     
     Cœurs de vie ramassables (+1 vie, +score)
     
-    Armes (épée et arc) avec usage limité
+    Armes (épée et arc) avec usage limité (une arme ne peut être utilisée que une seule fois)
     
     Carte globale affichée 
     
     HUD amélioré 
 
-    Contrôle supplémentaire (touche Entrée pour attaque)
+    contole supplémentaire : la touche Espace pour l'attaque avec l'épée et T+ZQSD pour l'attaque avec l'arc.
 
 Défis rencontrés :
 
@@ -22,10 +22,10 @@ Défis rencontrés :
     
     Lisibilité de la carte de progression
 
+    Difficulté de trouver la logique d'attaque avec l'arc, vu que pour attaquer avec une arc il faut aussi choisir un sens pour lancer l'arc
+
 
 Prochain Sprint :
-
-    Finaliser les features manquantes
     
     Améliorer l'interface 
     
