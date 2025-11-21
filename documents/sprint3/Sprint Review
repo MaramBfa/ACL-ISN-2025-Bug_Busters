@@ -1,7 +1,8 @@
 Sprint Review – Sprint 3 : Jeu du Labyrinthe
 
-Transformer le jeu en progression par niveaux avec 10 niveaux fixes, ajouter des objets de récupération de vie, améliorer le système de combat 
-avec des armes différenciées, et implémenter une carte de progression visuelle.
+Le Sprint 3 a permis de transformer le jeu en une véritable progression par niveaux, avec 10 niveaux fixes.
+Les principales avancées incluent l’ajout des objets de récupération de vie, l’amélioration du système de combat avec des armes différenciées,
+et l’implémentation d’une carte de progression visuelle.
 
 
 
@@ -20,6 +21,7 @@ avec des armes différenciées, et implémenter une carte de progression visuell
 ⏳Fonctionnalités non réalisées:
 
 -Touche dédiée pour attaquer : la touche Entrée n'est pas implémentée pour l'attaque.
+
 
 🔎Points clarifiés pendant la review
 
