@@ -4,15 +4,15 @@ import simple.Position;
 import java.util.Random;
 
 public class Monstre {
+
     private Position position;
     private Random rand = new Random();
 
     public Monstre(Position pos) {
         this.position = pos;
     }
-    
+
     public Monstre(int gridWidth, int gridHeight, int heroX, int heroY) {
-        Random rand = new Random();
         int x, y;
         do {
             x = rand.nextInt(gridHeight);
@@ -21,9 +21,21 @@ public class Monstre {
         position = new Position(x, y);
     }
 
-    public Position getPosition() { return position; }
+    // ⭐️ OBLIGATOIRE : getter
+    public Position getPos() {
+        return position;
+    }
+
+    // ⭐️ OBLIGATOIRE : setter
+    public void setPos(Position pos) {
+        this.position = pos;
+    }
+
+    public Position getPosition() {
+        return position;
+    }
 
     public void move(int gridWidth, int gridHeight) {
-        // La logique de déplacement est gérée par FenetreLabyrinthe.deplacerMonstres()
+        // la logique est gérée ailleurs
     }
 }

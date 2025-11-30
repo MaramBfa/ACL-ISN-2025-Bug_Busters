@@ -9,6 +9,7 @@ import entity.Weapon;
 import entity.WeaponType;
 import entity.Ghost;
 import entity.Zombie;
+import entity.Monstre;
 import simple.Position;
 import simple.Level;
 
@@ -100,17 +101,19 @@ public class JeuLabyrintheLauncher {
             occupees.add(tresorPos);
         }
 
-        // Monstres
-        ArrayList<Position> monstres = new ArrayList<>();
+        // --- ✅ MONSTRES : version corrigée ---
+        ArrayList<Monstre> monstres = new ArrayList<>();
         Random rand = new Random();
+
         int range = currentLevelEnum.maxMonsters - currentLevelEnum.minMonsters;
         int numMonstres = currentLevelEnum.minMonsters;
         if (range > 0) {
             numMonstres += rand.nextInt(range);
         }
+
         for (int i = 0; i < numMonstres; i++) {
             Position monstrePos = laby.placerAccessible(new HashSet<>(occupees), accessibles);
-            monstres.add(monstrePos);
+            monstres.add(new Monstre(monstrePos));    // <-- CORRECT
             occupees.add(monstrePos);
         }
 

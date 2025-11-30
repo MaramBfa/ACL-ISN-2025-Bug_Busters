@@ -1,6 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.bugbusters</groupId>
@@ -15,7 +16,7 @@
     </properties>
 
     <dependencies>
-        <!-- ✅ JUnit pour les tests -->
+        <!-- Tests -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -25,7 +26,8 @@
     </dependencies>
 
     <build>
-        <!-- ✅ Cette section permet à Maven de copier toutes les images -->
+
+        <!-- 📌 SECTION CRUCIALE : inclure les SONS -->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -33,11 +35,14 @@
                     <include>**/*.png</include>
                     <include>**/*.jpg</include>
                     <include>**/*.jpeg</include>
+                    <include>**/*.wav</include>    <!-- 🔥 ajouté -->
+                    <include>**/*.mp3</include>    <!-- optionnel -->
                 </includes>
             </resource>
         </resources>
 
         <plugins>
+
             <!-- Compilation -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -48,8 +53,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Exécution du projet -->
-
+            <!-- Exécution en DEV -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -59,7 +63,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Création du JAR exécutable -->
+            <!-- JAR exécutable -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -72,6 +76,8 @@
                     </archive>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
+
 </project>
