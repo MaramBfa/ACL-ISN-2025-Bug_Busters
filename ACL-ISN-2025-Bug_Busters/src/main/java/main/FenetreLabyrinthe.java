@@ -67,13 +67,18 @@ public class FenetreLabyrinthe extends JPanel {
     private long messageHUDTime = 0;
     private static final long DUREE_MESSAGE_HUD = 3000;
 
-    // Tir à l’arc (T puis Z/Q/S/D)
+    // Tir à l’arc (T puis flèches directionnelles)
     private boolean bowAiming = false;
 
     // Animation d’attaque (aura)
     private boolean animationAttaque = false;
     private long timeAttaque = 0;
     private static final int DUREE_ATTAQUE = 150; // en ms
+
+    // Effet visuel de la flèche : trajectoire temporaire
+    private java.util.List<Position> arrowTrail = new ArrayList<>();
+    private long arrowTrailTime = 0;
+    private static final int DUREE_TRAJECTOIRE_FLECHE = 150; // ms
 
     // Orientation horizontale (pour choisir le sprite gauche/droite)
     private String lastHorizontalDirection = "right";
@@ -148,7 +153,7 @@ public class FenetreLabyrinthe extends JPanel {
         // Ambiance jungle au début du niveau
         Sound.play("/sounds/jungle_ambient.wav");
 
-        // Gestion clavier : flèches pour bouger, T puis ZQSD pour arc, ESPACE pour épée
+        // Gestion clavier : flèches pour bouger, T puis flèches pour l’arc, ESPACE pour épée
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -177,7 +182,7 @@ public class FenetreLabyrinthe extends JPanel {
                 if (key == KeyEvent.VK_T) {
                     if (hero.peutUtiliserArc()) {
                         bowAiming = true;
-                        setMessageHUD("🏹 Direction (Z/Q/S/D)");
+                        setMessageHUD("🏹 Choisis une direction avec les flèches ↑ ↓ ← →");
                     } else if (hero.aArc()) {
                         setMessageHUD("🏹 Arc déjà utilisé !");
                     } else {
@@ -187,19 +192,19 @@ public class FenetreLabyrinthe extends JPanel {
                     return;
                 }
 
-                // 3) Direction du tir de l’arc (Z/Q/S/D)
+                // 3) Direction du tir de l’arc (FLÈCHES)
                 if (bowAiming &&
-                        (key == KeyEvent.VK_Z ||
-                                key == KeyEvent.VK_Q ||
-                                key == KeyEvent.VK_S ||
-                                key == KeyEvent.VK_D)) {
+                        (key == KeyEvent.VK_UP ||
+                         key == KeyEvent.VK_DOWN ||
+                         key == KeyEvent.VK_LEFT ||
+                         key == KeyEvent.VK_RIGHT)) {
 
                     int dx = 0, dy = 0;
 
-                    if (key == KeyEvent.VK_Z) dx = -1;  // Haut
-                    if (key == KeyEvent.VK_S) dx =  1;  // Bas
-                    if (key == KeyEvent.VK_Q) dy = -1;  // Gauche
-                    if (key == KeyEvent.VK_D) dy =  1;  // Droite
+                    if (key == KeyEvent.VK_UP)    dx = -1;  // Haut
+                    if (key == KeyEvent.VK_DOWN)  dx =  1;  // Bas
+                    if (key == KeyEvent.VK_LEFT)  dy = -1;  // Gauche
+                    if (key == KeyEvent.VK_RIGHT) dy =  1;  // Droite
 
                     demarrerAnimationAttaque();
                     attaquerArc(dx, dy);
@@ -210,12 +215,12 @@ public class FenetreLabyrinthe extends JPanel {
                     return;
                 }
 
-                // 4) DÉPLACEMENT : UNIQUEMENT AVEC LES FLÈCHES
+                // 4) DÉPLACEMENT : UNIQUEMENT AVEC LES FLÈCHES (hors visée arc)
                 if (!bowAiming &&
                         (key == KeyEvent.VK_UP ||
-                                key == KeyEvent.VK_DOWN ||
-                                key == KeyEvent.VK_LEFT ||
-                                key == KeyEvent.VK_RIGHT)) {
+                         key == KeyEvent.VK_DOWN ||
+                         key == KeyEvent.VK_LEFT ||
+                         key == KeyEvent.VK_RIGHT)) {
 
                     hero.deplacer(key, grille[0].length, grille.length, grille);
 
@@ -356,7 +361,7 @@ public class FenetreLabyrinthe extends JPanel {
         }
     }
 
-    // --- ATTAQUE ARC : ligne droite jusqu’au mur ---
+    // --- ATTAQUE ARC : ligne droite jusqu’au mur avec effet visuel ---
     private void attaquerArc(int dirX, int dirY) {
         if (dirX == 0 && dirY == 0) return;
 
@@ -368,12 +373,18 @@ public class FenetreLabyrinthe extends JPanel {
         boolean aToucheZombie = false;
         boolean aToucheFantome = false;
 
+        // On réinitialise la trajectoire visuelle
+        arrowTrail.clear();
+
         while (true) {
             x += dirX;
             y += dirY;
 
             if (x < 0 || x >= grille.length || y < 0 || y >= grille[0].length) break;
             if (grille[x][y] == '#') break;
+
+            // Ajout à la trajectoire de la flèche pour affichage
+            arrowTrail.add(new Position(x, y));
 
             // Monstres
             for (int i = 0; i < monstres.size(); i++) {
@@ -406,6 +417,11 @@ public class FenetreLabyrinthe extends JPanel {
                 // flèche traverse le fantôme
                 Sound.play("/sounds/ghost_pass.wav");
             }
+        }
+
+        // On déclenche l’affichage de la trajectoire pendant un court instant
+        if (!arrowTrail.isEmpty()) {
+            arrowTrailTime = System.currentTimeMillis();
         }
 
         if (aToucheFantome && !toucheQuelqueChose) {
@@ -765,8 +781,22 @@ public class FenetreLabyrinthe extends JPanel {
         g2.drawImage(heroImgToDraw, hero.getY() * TAILLE_CASE,
                 hero.getX() * TAILLE_CASE, null);
 
-        // Effet visuel d’attaque (aura rouge)
         long now = System.currentTimeMillis();
+
+        // Effet visuel de la trajectoire de la flèche (petits carrés jaunes)
+        if (!arrowTrail.isEmpty() && now - arrowTrailTime < DUREE_TRAJECTOIRE_FLECHE) {
+            g2.setColor(new Color(255, 255, 0, 200));
+            for (Position p : arrowTrail) {
+                int px = p.y * TAILLE_CASE + TAILLE_CASE / 4;
+                int py = p.x * TAILLE_CASE + TAILLE_CASE / 4;
+                int size = TAILLE_CASE / 2;
+                g2.fillRect(px, py, size, size);
+            }
+        } else if (!arrowTrail.isEmpty() && now - arrowTrailTime >= DUREE_TRAJECTOIRE_FLECHE) {
+            arrowTrail.clear();
+        }
+
+        // Effet visuel d’attaque (aura rouge)
         if (animationAttaque && now - timeAttaque < DUREE_ATTAQUE) {
             int hx = hero.getY() * TAILLE_CASE;
             int hy = hero.getX() * TAILLE_CASE;
