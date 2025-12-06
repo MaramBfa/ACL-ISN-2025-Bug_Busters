@@ -27,9 +27,54 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.*;
 
+/**
+ * Fenêtre principale d'affichage du labyrinthe.
+ */
 public class FenetreLabyrinthe extends JPanel {
 
     private static final long serialVersionUID = 1L;
+
+    // ------------ THÈME / TILES ------------
+
+    /** Représente un thème visuel (combinaison sol + mur) pour un niveau. */
+    private static class Theme {
+        final String floorPath;
+        final String wallPath;
+
+        Theme(String floorPath, String wallPath) {
+            this.floorPath = floorPath;
+            this.wallPath = wallPath;
+        }
+    }
+
+    /**
+     * 10 thèmes visuels – un par niveau.
+     * L'ordre correspond à Level.values()[0..9].
+     */
+    private static final Theme[] THEMES = new Theme[] {
+            // Niveau 1
+            new Theme("/tiles/floor1.jpg", "/tiles/wall1.jpg"),
+            // Niveau 2
+            new Theme("/tiles/floor2.jpg", "/tiles/wall1.jpg"),
+            // Niveau 3
+            new Theme("/tiles/floor1.jpg", "/tiles/wall2.jpg"),
+            // Niveau 4
+            new Theme("/tiles/floor3.jpg", "/tiles/wall3.jpg"),
+            // Niveau 5
+            new Theme("/tiles/floor4.jpg", "/tiles/wall2.jpg"),
+            // Niveau 6
+            new Theme("/tiles/floor2.jpg", "/tiles/wall4.jpg"),
+            // Niveau 7
+            new Theme("/tiles/floor3.jpg", "/tiles/wall1.jpg"),
+            // Niveau 8
+            new Theme("/tiles/floor4.jpg", "/tiles/wall3.jpg"),
+            // Niveau 9
+            new Theme("/tiles/floor1.jpg", "/tiles/wall4.jpg"),
+            // Niveau 10
+            new Theme("/tiles/floor4.jpg", "/tiles/wall4.jpg")
+    };
+
+    // ------------ CHAMPS DU JEU ------------
 
     private char[][] grille;
     private Heros hero;
@@ -50,13 +95,16 @@ public class FenetreLabyrinthe extends JPanel {
     private javax.swing.Timer timerMonstres;
     private javax.swing.Timer chronoTimer;
 
-    private Color wallColor;
-    private Color floorColor;
+    // Tiles du labyrinthe
+    private Image tileFloor, tileWall;
 
-    // Sprites
+    // Sprites entités
     private Image heroLeftImg, heroRightImg;
     private Image monsterImg, ghostImg, zombieImg,
             keyImg, treasureImg, swordImg, bowImg, heartImg, doorImg;
+
+    // HUD cœurs (plein / vide)
+    private Image heartFullImg, heartEmptyImg;
 
     private long startTime;
     private JLabel chronoLabel;
@@ -83,6 +131,10 @@ public class FenetreLabyrinthe extends JPanel {
     // Orientation horizontale (pour choisir le sprite gauche/droite)
     private String lastHorizontalDirection = "right";
 
+    // Musique : toggle ON/OFF (🔊 / 🔇)
+    private boolean musicOn = true;
+    private Button musicToggleBtn;
+
     public FenetreLabyrinthe(char[][] grille, Heros hero,
                              ArrayList<Monstre> monstres,
                              Cle cle, Door door, Tresor tresor,
@@ -102,45 +154,66 @@ public class FenetreLabyrinthe extends JPanel {
         this.currentLevel = level;
         this.coeurs = coeurs;
 
-        // Couleurs selon densité des murs
-        if (level.wallDensity < 0.25) {
-            wallColor = new Color(180, 220, 180);
-            floorColor = new Color(240, 250, 220);
-        } else if (level.wallDensity < 0.35) {
-            wallColor = new Color(150, 150, 150);
-            floorColor = new Color(200, 200, 200);
-        } else {
-            wallColor = new Color(60, 60, 60);
-            floorColor = new Color(100, 100, 100);
+        // --------- CHARGEMENT DU THEME (SOL + MUR) ---------
+        int levelIndex = Arrays.asList(Level.values()).indexOf(level);
+        if (levelIndex < 0 || levelIndex >= THEMES.length) {
+            levelIndex = 0;
         }
+        Theme theme = THEMES[levelIndex];
 
-        // Chargement des images
-        heroLeftImg = loadImage("/images/hero_left.png");
+        tileFloor = loadImage(theme.floorPath);
+        tileWall  = loadImage(theme.wallPath);
+
+        // --------- SPRITES EXISTANTS ---------
+        heroLeftImg  = loadImage("/images/hero_left.png");
         heroRightImg = loadImage("/images/hero_right.png");
 
-        monsterImg = loadImage("/images/monster.png");
-        ghostImg = loadImage("/images/ghost.png");
-        zombieImg = loadImage("/images/zombie.png");
-        keyImg = loadImage("/images/key.png");
-        treasureImg = loadImage("/images/treasure.png");
-        swordImg = loadImage("/images/sword.png");
-        bowImg = loadImage("/images/bow.png");
-        heartImg = loadImage("/images/Coeur.png");
-        doorImg = loadImage("/images/door.png");
+        monsterImg   = loadImage("/images/monster.png");
+        ghostImg     = loadImage("/images/ghost.png");
+        zombieImg    = loadImage("/images/zombie.png");
+        keyImg       = loadImage("/images/key.png");
+        treasureImg  = loadImage("/images/treasure.png");
+        swordImg     = loadImage("/images/sword.png");
+        bowImg       = loadImage("/images/bow.png");
+        heartImg     = loadImage("/images/Coeur.png"); // cœur posé au sol (pickup)
+        doorImg      = loadImage("/images/door.png");
+
+        // Cœurs HUD : plein / vide
+        heartFullImg  = loadImage("/images/heart_full.png");
+        // ⚠️ Correction ici : fichier supposé s'appeler heart_empty.png
+        heartEmptyImg = loadImage("/images/heart_empty.png");
 
         setPreferredSize(new Dimension(
                 grille[0].length * TAILLE_CASE,
                 grille.length * TAILLE_CASE + 150));
         setFocusable(true);
 
+        setLayout(new BorderLayout());
+
         // Chronomètre
         startTime = System.currentTimeMillis();
         chronoLabel = new JLabel("Temps : 0 sec - Cœurs restants: "
                 + getCoeursRestants() + "/" + coeurs.size());
         chronoLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        chronoLabel.setForeground(Color.BLUE);
-        setLayout(new BorderLayout());
-        add(chronoLabel, BorderLayout.NORTH);
+        chronoLabel.setForeground(Color.WHITE);
+
+        // --- Bouton Musique (toggle 🔊 / 🔇) ---
+        musicToggleBtn = new Button("🔊");
+        musicToggleBtn.setBackground(Color.BLACK);
+        musicToggleBtn.setForeground(Color.WHITE);
+        musicToggleBtn.addActionListener(e -> {
+            toggleMusic();
+            // Reprendre le focus clavier pour les déplacements du héros
+            FenetreLabyrinthe.this.requestFocusInWindow();
+        });
+
+        // Panel supérieur combinant chrono + bouton musique
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(Color.BLACK);
+        topPanel.add(chronoLabel, BorderLayout.WEST);
+        topPanel.add(musicToggleBtn, BorderLayout.EAST);
+
+        add(topPanel, BorderLayout.NORTH);
 
         chronoTimer = new Timer(1000, e -> {
             long elapsed = (System.currentTimeMillis() - startTime) / 1000;
@@ -150,8 +223,10 @@ public class FenetreLabyrinthe extends JPanel {
         });
         chronoTimer.start();
 
-        // Ambiance jungle au début du niveau
-        Sound.play("/sounds/jungle_ambient.wav");
+        // Musique jungle du niveau (en boucle, uniquement pendant la partie)
+        Sound.loop("/sounds/jungle_ambient.wav");
+        musicOn = true;
+        musicToggleBtn.setLabel("🔊");
 
         // Gestion clavier : flèches pour bouger, T puis flèches pour l’arc, ESPACE pour épée
         addKeyListener(new KeyAdapter() {
@@ -165,10 +240,10 @@ public class FenetreLabyrinthe extends JPanel {
                 if (key == KeyEvent.VK_SPACE) {
                     if (hero.peutUtiliserEpee()) {
                         demarrerAnimationAttaque();
-                        // son d'attaque corps-à-corps
-                        Sound.play("/sounds/monster_snarl.wav");
-                        attaquerEpee();
-                        hero.consommerEpee();
+                        boolean touche = attaquerEpee();
+                        if (touche) {
+                            hero.consommerEpee();
+                        }
                     } else if (hero.aEpee()) {
                         setMessageHUD("🗡️ Tu as déjà utilisé ton épée !");
                     } else {
@@ -207,8 +282,10 @@ public class FenetreLabyrinthe extends JPanel {
                     if (key == KeyEvent.VK_RIGHT) dy =  1;  // Droite
 
                     demarrerAnimationAttaque();
-                    attaquerArc(dx, dy);
-                    hero.consommerArc();
+                    boolean touche = attaquerArc(dx, dy);
+                    if (touche) {
+                        hero.consommerArc();
+                    }
                     bowAiming = false;
 
                     repaint();
@@ -231,7 +308,6 @@ public class FenetreLabyrinthe extends JPanel {
                     } else if ("right".equals(dir)) {
                         lastHorizontalDirection = "right";
                     }
-                    // Si dir = up/down → on garde la dernière orientation horizontale
 
                     verifierCollisions();
                     verifierSiBloque();
@@ -253,6 +329,25 @@ public class FenetreLabyrinthe extends JPanel {
             }
         });
         timerMonstres.start();
+
+        // 🔥 Important : prendre le focus clavier dès que la fenêtre est affichée
+        SwingUtilities.invokeLater(() -> FenetreLabyrinthe.this.requestFocusInWindow());
+    }
+
+    // ---- Gestion musique : toggle 🔊 / 🔇 ----
+    private void toggleMusic() {
+        if (musicOn) {
+            // ON -> OFF : on coupe la musique
+            Sound.stopMusic();
+            musicOn = false;
+            musicToggleBtn.setLabel("🔇");
+        } else {
+            // OFF -> ON : on relance le fichier depuis le début
+            Sound.stopMusic();
+            Sound.loop("/sounds/jungle_ambient.wav");
+            musicOn = true;
+            musicToggleBtn.setLabel("🔊");
+        }
     }
 
     // Démarrage de l’animation d’attaque
@@ -316,7 +411,7 @@ public class FenetreLabyrinthe extends JPanel {
     }
 
     // --- ATTAQUE ÉPÉE : zone de 1 case autour (et même case) ---
-    private void attaquerEpee() {
+    private boolean attaquerEpee() {
         int hx = hero.getX();
         int hy = hero.getY();
         boolean cibleTouchee = false;
@@ -330,7 +425,6 @@ public class FenetreLabyrinthe extends JPanel {
                 aSupprimer.add(m);
                 hero.ajouterScore(50);
                 cibleTouchee = true;
-                // monstre éliminé → grognement
                 Sound.play("/sounds/monster_snarl.wav");
             }
         }
@@ -359,11 +453,13 @@ public class FenetreLabyrinthe extends JPanel {
         } else {
             setMessageHUD("🗡️ Coup d'épée dans le vide...");
         }
+
+        return cibleTouchee;
     }
 
     // --- ATTAQUE ARC : ligne droite jusqu’au mur avec effet visuel ---
-    private void attaquerArc(int dirX, int dirY) {
-        if (dirX == 0 && dirY == 0) return;
+    private boolean attaquerArc(int dirX, int dirY) {
+        if (dirX == 0 && dirY == 0) return false;
 
         int x = hero.getX();
         int y = hero.getY();
@@ -414,7 +510,6 @@ public class FenetreLabyrinthe extends JPanel {
             // Fantôme (traversé)
             if (fantome.getPos().x == x && fantome.getPos().y == y) {
                 aToucheFantome = true;
-                // flèche traverse le fantôme
                 Sound.play("/sounds/ghost_pass.wav");
             }
         }
@@ -435,6 +530,8 @@ public class FenetreLabyrinthe extends JPanel {
         } else {
             setMessageHUD("🏹 Flèche perdue dans le labyrinthe...");
         }
+
+        return toucheQuelqueChose;
     }
 
     private void verifierCollisions() {
@@ -466,7 +563,6 @@ public class FenetreLabyrinthe extends JPanel {
             }
 
             if (hit) {
-                // sons différents selon l’ennemi
                 if ("monstre".equals(typeEnnemi)) {
                     Sound.play("/sounds/monster_snarl.wav");
                 } else if ("zombie".equals(typeEnnemi)) {
@@ -498,7 +594,7 @@ public class FenetreLabyrinthe extends JPanel {
                 hero.ajouterScore(10);
                 int restants = getCoeursRestants();
                 setMessageHUD("❤️ Cœur ramassé ! +1 Vie ! +10 points (" + restants + " restant(s))");
-                Sound.play("/sounds/key_pickup.wav");
+                Sound.play("/sounds/heart.wav");
                 break;
             }
         }
@@ -528,11 +624,12 @@ public class FenetreLabyrinthe extends JPanel {
                     setMessageHUD("🏹 Arc ramassé ! (1 utilisation)");
                 }
                 hero.ajouterScore(20);
-                Sound.play("/sounds/key_pickup.wav");
+                Sound.play("/sounds/heart.wav");
             }
         }
 
         // Porte
+     // Porte
         if (door != null
                 && hero.getX() == door.getPos().x
                 && hero.getY() == door.getPos().y) {
@@ -540,20 +637,36 @@ public class FenetreLabyrinthe extends JPanel {
             if (!hero.hasKey()) {
                 setMessageHUD("🔒 Porte verrouillée ! Trouvez la clé d'abord.");
             } else {
+
+                // On utilise la clé
                 hero.useKey();
+
+                // ARRÊT DES TIMERS
                 chronoTimer.stop();
                 timerMonstres.stop();
                 partieTerminee = true;
+
+                // Score de fin
                 hero.ajouterScore(50);
 
-                // Son d'ouverture de porte + jingle de victoire
+                // 🔥 ON SUPPRIME TOUTES LES ARMES ICI !
+                hero.resetArmes();
+
+                // Stop musique du niveau
+                Sound.stopMusic();
+
+                // Sons
                 Sound.play("/sounds/door_unlock.wav");
                 Sound.play("/sounds/victory_jingle.wav");
 
+                // Temps final
                 long finalTime = (System.currentTimeMillis() - startTime) / 1000;
+
+                // Passage au niveau suivant
                 JeuLabyrintheLauncher.niveauTermine(hero, finalTime);
             }
         }
+
 
         // Trésor (niveau 10)
         if (tresor != null
@@ -565,7 +678,8 @@ public class FenetreLabyrinthe extends JPanel {
             partieTerminee = true;
             hero.ajouterScore(200);
 
-            // Son de victoire finale
+            // Coupe la musique du niveau
+            Sound.stopMusic();
             Sound.play("/sounds/victory_jingle.wav");
 
             long finalTime = (System.currentTimeMillis() - startTime) / 1000;
@@ -625,7 +739,8 @@ public class FenetreLabyrinthe extends JPanel {
         chronoTimer.stop();
         partieTerminee = true;
 
-        // Son d’échec
+        // Coupe la musique de la partie
+        Sound.stopMusic();
         Sound.play("/sounds/fail.wav");
 
         JOptionPane.showMessageDialog(this, message, titre, JOptionPane.ERROR_MESSAGE);
@@ -650,22 +765,17 @@ public class FenetreLabyrinthe extends JPanel {
         try {
             java.net.URL url = getClass().getResource(path);
             if (url != null) {
-
-                // Charger image origine
                 Image img = new ImageIcon(url).getImage();
 
-                // Taille écran
                 Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-                int maxW = (int) (screen.width * 0.6);   // 60% largeur écran
-                int maxH = (int) (screen.height * 0.75); // 75% hauteur écran
+                int maxW = (int) (screen.width * 0.6);
+                int maxH = (int) (screen.height * 0.75);
 
                 int imgW = img.getWidth(null);
                 int imgH = img.getHeight(null);
 
-                // Ratio d’origine
                 double ratio = (double) imgW / imgH;
 
-                // Nouveau ratio qui rentre dans l’écran
                 int newW = imgW;
                 int newH = imgH;
 
@@ -693,7 +803,7 @@ public class FenetreLabyrinthe extends JPanel {
 
         return JOptionPane.showOptionDialog(
                 null,
-                "",  // pas de texte au dessus de l’image
+                "",
                 "Niveau " + niveau + " terminé !",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.PLAIN_MESSAGE,
@@ -709,15 +819,20 @@ public class FenetreLabyrinthe extends JPanel {
 
         Graphics2D g2 = (Graphics2D) g;
 
-        // Sol + murs
+        // ====== LABYRINTHE : SOL + MURS AVEC TILES ======
         for (int i = 0; i < grille.length; i++) {
             for (int j = 0; j < grille[0].length; j++) {
-                g2.setColor(floorColor);
-                g2.fillRect(j * TAILLE_CASE, i * TAILLE_CASE, TAILLE_CASE, TAILLE_CASE);
+
+                g2.drawImage(tileFloor,
+                        j * TAILLE_CASE,
+                        i * TAILLE_CASE,
+                        null);
 
                 if (grille[i][j] == '#') {
-                    g2.setColor(wallColor);
-                    g2.fillRect(j * TAILLE_CASE, i * TAILLE_CASE, TAILLE_CASE, TAILLE_CASE);
+                    g2.drawImage(tileWall,
+                            j * TAILLE_CASE,
+                            i * TAILLE_CASE,
+                            null);
                 }
             }
         }
@@ -740,7 +855,7 @@ public class FenetreLabyrinthe extends JPanel {
                     tresor.getPos().x * TAILLE_CASE, null);
         }
 
-        // Cœurs
+        // Cœurs posés dans le labyrinthe
         for (Heart coeur : coeurs) {
             if (!coeur.estRamassee()) {
                 g2.drawImage(heartImg, coeur.getPos().y * TAILLE_CASE,
@@ -774,7 +889,7 @@ public class FenetreLabyrinthe extends JPanel {
                     zombie.getPos().x * TAILLE_CASE, null);
         }
 
-        // Héros : sprite gauche/droite selon lastHorizontalDirection
+        // Héros
         Image heroImgToDraw =
                 "left".equals(lastHorizontalDirection) ? heroLeftImg : heroRightImg;
 
@@ -783,7 +898,7 @@ public class FenetreLabyrinthe extends JPanel {
 
         long now = System.currentTimeMillis();
 
-        // Effet visuel de la trajectoire de la flèche (petits carrés jaunes)
+        // Effet visuel de la trajectoire de la flèche
         if (!arrowTrail.isEmpty() && now - arrowTrailTime < DUREE_TRAJECTOIRE_FLECHE) {
             g2.setColor(new Color(255, 255, 0, 200));
             for (Position p : arrowTrail) {
@@ -807,29 +922,33 @@ public class FenetreLabyrinthe extends JPanel {
             animationAttaque = false;
         }
 
+        // ---- HUD EN BAS ----
         int hudY = grille.length * TAILLE_CASE + 30;
         g2.setColor(Color.BLACK);
         g2.setFont(new Font("Arial", Font.BOLD, 14));
         g2.drawString("Score : " + hero.getScore(), 10, hudY);
 
-        // Barre de vie
-        g2.drawString("Vie : ", 150, hudY);
-        for (int i = 0; i < 5; i++) {
-            if (i < hero.getPointsDeVie()) {
-                g2.setColor(Color.RED);
-                g2.fillRect(190 + i * 15, hudY - 12, 12, 12);
-            }
-            g2.setColor(Color.BLACK);
-            g2.drawRect(190 + i * 15, hudY - 12, 12, 12);
+        // --- Affichage des cœurs (vies héro) ---
+        int maxHearts = 5;
+        int pv = hero.getPointsDeVie();
+        int heartSize = 24;
+        int startX = 130;
+        int y = hudY - 18;
+
+        g2.drawString("Vie :", 90, hudY);
+
+        for (int i = 0; i < maxHearts; i++) {
+            Image img = (i < pv) ? heartFullImg : heartEmptyImg;
+            g2.drawImage(img, startX + i * (heartSize + 4), y, heartSize, heartSize, null);
         }
 
-        // Affichage des armes et usages restants
+        // Affichage des armes et usages restants (décalé à droite pour éviter chevauchement)
         String armeStr = "Épée: " + hero.getUsagesEpeeRestants()
                 + " | Arc: " + hero.getUsagesArcRestants();
-        g2.drawString("Armes : " + armeStr, 300, hudY);
+        g2.drawString("Armes : " + armeStr, 330, hudY);
 
-        g2.drawString("Clé : " + (hero.hasKey() ? "🔑" : "❌"), 520, hudY);
-        g2.drawString("Cœurs: " + getCoeursRestants() + "/" + coeurs.size(), 600, hudY);
+        g2.drawString("Clé : " + (hero.hasKey() ? "🔑" : "❌"), 620, hudY);
+        g2.drawString("Cœurs: " + getCoeursRestants() + "/" + coeurs.size(), 700, hudY);
 
         // Message HUD
         if (messageHUD.length() > 0 &&
@@ -838,10 +957,10 @@ public class FenetreLabyrinthe extends JPanel {
             g2.fillRect(10, hudY + 20, getWidth() - 20, 25);
             g2.setColor(Color.YELLOW);
             g2.setFont(new Font("Arial", Font.BOLD, 12));
-            g2.drawString(messageHUD.toString(), 20, hudY + 37);
+            g2.drawString(messageHUD.toString(), 20, hudY + 38);
         }
 
-        dessinerCarteGlobale(g, hudY + 50);
+        dessinerCarteGlobale(g, hudY + 60);
     }
 
     private void dessinerCarteGlobale(Graphics g, int mapY) {

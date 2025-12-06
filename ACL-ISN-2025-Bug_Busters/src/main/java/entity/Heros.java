@@ -15,7 +15,7 @@ public class Heros {
     private int pointsDeVie = 3;
     private final int MAX_POINTS_DE_VIE = 5;
 
-    // Le héros peut avoir les deux armes séparément
+    // les armes sont indépendantes , le hero peut les avoir séparement
     private boolean aEpee = false;
     private boolean aArc = false;
 
@@ -250,4 +250,17 @@ public class Heros {
                 weaponSelected
         );
     }
+ // ----------- RESET DES ARMES POUR CHANGER DE NIVEAU -----------
+    public void resetArmes() {
+        this.aEpee = false;
+        this.usagesEpeeRestants = 0;
+
+        this.aArc = false;
+        this.usagesArcRestants = 0;
+
+        this.weaponSelected = WeaponType.NONE;
+    }
+
 }
+
+

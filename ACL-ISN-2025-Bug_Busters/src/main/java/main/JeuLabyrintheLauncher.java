@@ -35,100 +35,162 @@ public class JeuLabyrintheLauncher {
 
     // Lancer un niveau (avec éventuellement un héros déjà existant)
     public static void lancerNouveauNiveau(Heros herosStats) {
+
         Level currentLevelEnum = getLevelEnum(niveauActuel);
 
         if (currentLevelEnum == null) {
             JOptionPane.showMessageDialog(null,
-                    "FIN DU JEU ! Tous les niveaux sont terminés.",
-                    "Victoire Totale", JOptionPane.INFORMATION_MESSAGE);
+                "FIN DU JEU ! Tous les niveaux sont terminés.",
+                "Victoire Totale", JOptionPane.INFORMATION_MESSAGE);
             MenuPrincipal.lancerNouvellePartie();
             return;
         }
 
+        // --- Héros ---
         Heros heros;
         if (herosStats != null) {
             heros = herosStats;
-            heros.resetPosition(
-                    currentLevelEnum.height / 2,
-                    currentLevelEnum.width / 2);
+            heros.resetPosition(currentLevelEnum.height / 2, currentLevelEnum.width / 2);
         } else {
-            heros = new Heros(
-                    currentLevelEnum.height / 2,
-                    currentLevelEnum.width / 2);
+            heros = new Heros(currentLevelEnum.height / 2, currentLevelEnum.width / 2);
         }
 
+        // Génération du labyrinthe
         Labyrinthe laby = new Labyrinthe(currentLevelEnum);
         char[][] grille = laby.getGrille();
         Position centre = new Position(heros.getX(), heros.getY());
 
         ArrayList<Position> occupees = new ArrayList<>();
         occupees.add(centre);
+
         Set<Position> accessibles = laby.trouverZonesAccessibles(centre);
 
-        // Clé
-        Cle cle = new Cle(laby.placerAccessible(new HashSet<>(occupees), accessibles));
-        occupees.add(cle.getPos());
+        // ---------------------------------------------
+        // CLÉ
+        // ---------------------------------------------
+        Position posCle = laby.placerLoinDeAccessible(
+                centre, 4,
+                new HashSet<>(occupees),
+                accessibles
+        );
+        Cle cle = new Cle(posCle);
+        occupees.add(posCle);
 
-        // Porte
-        Door porte = new Door(laby.placerLoinDe(centre));
-        occupees.add(porte.getPos());
+        // ---------------------------------------------
+        // PORTE
+        // ---------------------------------------------
+        Position posPorte = laby.placerLoinDeAccessible(
+                centre, 10,
+                new HashSet<>(occupees),
+                accessibles
+        );
+        Door porte = new Door(posPorte);
+        occupees.add(posPorte);
 
-        // Armes
+        // ---------------------------------------------
+        // ARMES
+        // ---------------------------------------------
         ArrayList<Weapon> armes = new ArrayList<>();
+
         if (currentLevelEnum.hasWeapons) {
-            Position posEpee = laby.placerAccessible(new HashSet<>(occupees), accessibles);
+
+            Position posEpee = laby.placerLoinDeAccessible(
+                    centre, 4,
+                    new HashSet<>(occupees),
+                    accessibles
+            );
             armes.add(new Weapon(posEpee, WeaponType.EPEE));
             occupees.add(posEpee);
 
-            Position posArc = laby.placerAccessible(new HashSet<>(occupees), accessibles);
+            Position posArc = laby.placerLoinDeAccessible(
+                    centre, 4,
+                    new HashSet<>(occupees),
+                    accessibles
+            );
             armes.add(new Weapon(posArc, WeaponType.ARC));
             occupees.add(posArc);
         }
 
-        // Cœurs
+        // ---------------------------------------------
+        // COEURS
+        // ---------------------------------------------
         ArrayList<Heart> coeurs = new ArrayList<>();
         for (int i = 0; i < currentLevelEnum.nbCoeurs; i++) {
-            Position posCoeur = laby.placerAccessible(new HashSet<>(occupees), accessibles);
+
+            Position posCoeur = laby.placerLoinDeAccessible(
+                    centre, 3,
+                    new HashSet<>(occupees),
+                    accessibles
+            );
             coeurs.add(new Heart(posCoeur));
             occupees.add(posCoeur);
         }
 
-        // Trésor uniquement au niveau 10
+        // ---------------------------------------------
+        // TRÉSOR (seulement niveau 10)
+        // ---------------------------------------------
         Tresor tresor = null;
         if (niveauActuel == 10) {
-            Position tresorPos = laby.placerLoinDe(centre);
-            tresor = new Tresor(tresorPos);
-            occupees.add(tresorPos);
+
+            Position posTresor = laby.placerLoinDeAccessible(
+                    centre, 12,
+                    new HashSet<>(occupees),
+                    accessibles
+            );
+            tresor = new Tresor(posTresor);
+            occupees.add(posTresor);
         }
 
-        // --- ✅ MONSTRES : version corrigée ---
+        // ---------------------------------------------
+        // MONSTRES
+        // ---------------------------------------------
         ArrayList<Monstre> monstres = new ArrayList<>();
         Random rand = new Random();
 
         int range = currentLevelEnum.maxMonsters - currentLevelEnum.minMonsters;
         int numMonstres = currentLevelEnum.minMonsters;
-        if (range > 0) {
-            numMonstres += rand.nextInt(range);
-        }
+        if (range > 0) numMonstres += rand.nextInt(range);
 
         for (int i = 0; i < numMonstres; i++) {
-            Position monstrePos = laby.placerAccessible(new HashSet<>(occupees), accessibles);
-            monstres.add(new Monstre(monstrePos));    // <-- CORRECT
-            occupees.add(monstrePos);
+
+            Position posMonstre = laby.placerLoinDeAccessible(
+                    centre, 5,
+                    new HashSet<>(occupees),
+                    accessibles
+            );
+
+            monstres.add(new Monstre(posMonstre));
+            occupees.add(posMonstre);
         }
 
-        // Fantôme & zombie
-        Ghost fantome = new Ghost(
-                laby.placerAccessible(new HashSet<>(occupees), accessibles));
-        occupees.add(fantome.getPos());
+        // ---------------------------------------------
+        // FANTÔME (distance plus grande)
+        // ---------------------------------------------
+        Position posFantome = laby.placerLoinDeAccessible(
+                centre, 8,
+                new HashSet<>(occupees),
+                accessibles
+        );
+        Ghost fantome = new Ghost(posFantome);
+        occupees.add(posFantome);
 
-        Zombie zombie = new Zombie(
-                laby.placerAccessible(new HashSet<>(occupees), accessibles));
-        occupees.add(zombie.getPos());
+        // ---------------------------------------------
+        // ZOMBIE
+        // ---------------------------------------------
+        Position posZombie = laby.placerLoinDeAccessible(
+                centre, 7,
+                new HashSet<>(occupees),
+                accessibles
+        );
+        Zombie zombie = new Zombie(posZombie);
+        occupees.add(posZombie);
 
-        // Fenêtre
-        JFrame frame = new JFrame("Labyrinthe - Niveau "
-                + niveauActuel + " (" + currentLevelEnum.nbCoeurs + " ❤️)");
+        // ---------------------------------------------
+        // FENETRE DU JEU
+        // ---------------------------------------------
+        JFrame frame = new JFrame("Labyrinthe - Niveau " + niveauActuel +
+                " (" + currentLevelEnum.nbCoeurs + " ❤️)");
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
 
@@ -153,17 +215,21 @@ public class JeuLabyrintheLauncher {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        // Mise à jour dernier niveau atteint
+        // ---------------------------------------------
+        // MISE À JOUR DU SUIVI DE PROGRESSION
+        // ---------------------------------------------
         if (niveauActuel > dernierNiveauAtteint) {
             dernierNiveauAtteint = niveauActuel;
             System.out.println("🎯 Mise à jour dernier niveau atteint: " + dernierNiveauAtteint);
         }
 
-        String messageNiveau = "Niveau " + niveauActuel + " - "
-                + currentLevelEnum.nbCoeurs + " ❤️ disponibles";
-        if (niveauActuel == 10) {
+        // HUD message
+        String messageNiveau = "Niveau " + niveauActuel + " - " +
+                currentLevelEnum.nbCoeurs + " ❤️ disponibles";
+
+        if (niveauActuel == 10)
             messageNiveau += "\n🏆 NIVEAU FINAL - Trouvez le trésor!";
-        }
+
         panel.setMessageHUD("🎮 " + messageNiveau);
     }
 
@@ -178,10 +244,10 @@ public class JeuLabyrintheLauncher {
             int niveauPerdu = niveauActuel;
 
             JOptionPane.showMessageDialog(null,
-                    "GAME OVER au niveau " + niveauPerdu + " !\n"
-                            + "Score final : " + hero.getScore() + "\n"
-                            + "Vous recommencez au niveau " + niveauPerdu,
-                    "Défaite", JOptionPane.ERROR_MESSAGE);
+                "GAME OVER au niveau " + niveauPerdu + " !\n"
+                + "Score final : " + hero.getScore() + "\n"
+                + "Vous recommencez au niveau " + niveauPerdu,
+                "Défaite", JOptionPane.ERROR_MESSAGE);
 
             herosActuel = null;
             lancerNouveauNiveau(null);
@@ -196,15 +262,13 @@ public class JeuLabyrintheLauncher {
         FenetreLabyrinthe fen = hero.getFenetreActuelle();
         int choix = fen.afficherImageVictoire(niveauTermine);
 
-        // Bouton QUITTER
         if (choix == 1) System.exit(0);
 
-        // Bouton CONTINUER
         herosActuel = hero;
 
         if (niveauTermine == 10) {
             JOptionPane.showMessageDialog(null,
-                    "🎉 VICTOIRE TOTALE ! Vous avez terminé tous les niveaux !");
+                "🎉 VICTOIRE TOTALE ! Vous avez terminé tous les niveaux !");
             niveauActuel = 1;
             dernierNiveauAtteint = 1;
             MenuPrincipal.lancerNouvellePartie();
@@ -226,17 +290,16 @@ public class JeuLabyrintheLauncher {
     public static void continuerPartie() {
         if (dernierNiveauAtteint > 1) {
             int choix = JOptionPane.showConfirmDialog(null,
-                    "Voulez-vous continuer au niveau " + dernierNiveauAtteint + "?\n"
-                            + "Ou recommencer depuis le niveau 1?",
-                    "Continuer la partie",
-                    JOptionPane.YES_NO_OPTION);
+                "Voulez-vous continuer au niveau " + dernierNiveauAtteint + "?\n"
+                + "Ou recommencer depuis le niveau 1?",
+                "Continuer la partie",
+                JOptionPane.YES_NO_OPTION);
 
-            if (choix == JOptionPane.YES_OPTION) {
+            if (choix == 1) lancerJeu();
+            else {
                 niveauActuel = dernierNiveauAtteint;
                 herosActuel = null;
                 lancerNouveauNiveau(null);
-            } else {
-                lancerJeu();
             }
         } else {
             lancerJeu();
