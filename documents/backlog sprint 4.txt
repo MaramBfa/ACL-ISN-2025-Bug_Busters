@@ -13,19 +13,11 @@ Effets visuels et sonores
 
 	-Effets sonores : rugissement quand ils apparaissent, bruit de pas quand ils approchent.
 
-Niveau 10
-
-	-Boss final : au niveau 10, un monstre plus grand avec plusieurs phases d’attaque.
-	-Bombe : une bombe qu'au niveau 10 pour attaquer ce big monstre
-
-Nouveaux objets et mécaniques
-
-	-Potion magique d’invincibilité : annule les collisions avec tous les monstres pendant 5 secondes.
-	-piège : ralentissement si le joueur marche sur un piège.
 
 Héros plus vivant
 
 	-Changement de direction de vue : sprite du héros qui s’oriente selon la direction (haut, bas, gauche, droite).
 
 Ajouter des tests unitaires 
+
 
