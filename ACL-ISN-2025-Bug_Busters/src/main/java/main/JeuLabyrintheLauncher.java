@@ -94,13 +94,11 @@ public class JeuLabyrintheLauncher {
          do {
              posPorte = laby.placerLoinDeAccessible(
                      centre,
-                     10,              //distance minimale depuis le héros
+                     10,  //distance minimale depuis le héros
                      new HashSet<>(occupees),
                      accessibles
              );
-
              essais++;
-
              //si trop d’essais → on arrête la boucle, on accepte la position actuelle
              if (essais > MAX_ESSAIS) break;
 

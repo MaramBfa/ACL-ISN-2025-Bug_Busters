@@ -5,91 +5,97 @@ import java.net.URL;
 
 public class Sound {
 
-    // >>>>>>>>>> IMPORTANT : ceci manquait <<<<<<<<<<
+    //variable pour garder la derniere musique jouée (pratique pour stop/resume)
     private static Clip lastClip;
 
-    // Lecture "one-shot"
+    //lecture d’un son une seule fois 
     public static void play(String path) {
         try {
+            //on récupère le fichier dans resources
             URL url = Sound.class.getResource(path);
-
+            //si le fichier existe pas on affiche une erreur
             if (url == null) {
-                System.err.println("❌ [SOUND ERROR] Ressource introuvable : " + path);
+                System.err.println("❌ [SOUND ERROR] ressource introuvable : " + path);
                 return;
             }
-
+            //on charge le son dans un audioinputstream
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
-
+            //on crée un clip pour lire le son
             Clip clip = AudioSystem.getClip();
             clip.open(audioIn);
+            //on joue le son une fois
             clip.start();
-
         } catch (UnsupportedAudioFileException e) {
-            System.err.println("❌ Format audio NON supporté : " + path);
-            System.err.println("   Utilise : WAV PCM 44100Hz 16bit");
+            //si on utilise un mauvais format audio
+            System.err.println("❌ format audio pas supporté : " + path);
+            System.err.println("   faut un wav pcm 44100hz 16bit");
         } catch (Exception e) {
-            System.err.println("❌ Impossible de lire : " + path);
+            //erreur quelconque
+            System.err.println("❌ impossible de lire : " + path);
             e.printStackTrace();
         }
     }
-
-    // >>>>>>>>>> MUSIQUE EN BOUCLE (loop) <<<<<<<<<<
+    //jouer une musique en boucle 
     public static void loop(String path) {
         try {
+            //on récupère le lien du fichier
             URL url = Sound.class.getResource(path);
             if (url == null) {
-                System.err.println("❌ [SOUND ERROR] Ressource introuvable : " + path);
+                System.err.println("❌ [SOUND ERROR] ressource introuvable : " + path);
                 return;
             }
-
+            //on charge la musique
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
             Clip clip = AudioSystem.getClip();
             clip.open(audioIn);
-
+            //lecture infinie
             clip.loop(Clip.LOOP_CONTINUOUSLY);
             clip.start();
-
-            lastClip = clip; // mémorise la musique en cours
+            //on retient cette musique pour la stopper plus tard
+            lastClip = clip;
 
         } catch (Exception e) {
-            System.err.println("❌ Impossible de lire la musique en boucle : " + path);
+            System.err.println("❌ impossible de lire la musique en boucle : " + path);
             e.printStackTrace();
         }
     }
 
-    // >>>>>>>>>> STOP MUSIQUE <<<<<<<<<<
+    //stopper la musique actuelle
     public static void stopMusic() {
         try {
+            //si une musique existe et elle joue encore alors on stop
             if (lastClip != null && lastClip.isRunning()) {
                 lastClip.stop();
             }
         } catch (Exception e) {
-            System.err.println("❌ Impossible d’arrêter la musique");
+            System.err.println("❌ impossible d’arrêter la musique");
             e.printStackTrace();
         }
     }
 
-    // >>>>>>>>>> REPRENDRE MUSIQUE <<<<<<<<<<
+    //reprendre la musique stoppée précédemment
     public static void resumeMusic() {
         try {
+            //si ya une musique et elle est à l’arrêt alors on la relance
             if (lastClip != null && !lastClip.isRunning()) {
                 lastClip.loop(Clip.LOOP_CONTINUOUSLY);
                 lastClip.start();
             }
         } catch (Exception e) {
-            System.err.println("❌ Impossible de reprendre la musique");
+            System.err.println("❌ impossible de reprendre la musique");
             e.printStackTrace();
         }
     }
 
-    // Test rapide
+    //test pour voir si un fichier son existe dans resources
     public static void test(String path) {
-        System.out.println("🔎 Test du son : " + path);
+        System.out.println("🔎 test du son : " + path);
         URL u = Sound.class.getResource(path);
+
         if (u == null) {
-            System.err.println("❌ Le son n’est pas trouvé : " + path);
+            System.err.println("❌ le son est introuvable : " + path);
         } else {
-            System.out.println("✔ Trouvé : " + u);
+            System.out.println("✔ trouvé : " + u);
         }
     }
 }
