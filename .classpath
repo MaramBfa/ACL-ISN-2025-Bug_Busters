@@ -3,5 +3,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="ACL-ISN-2025-Bug_Busters/src/main/java"/>
 	<classpathentry kind="src" path="ACL-ISN-2025-Bug_Busters/src/test/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="output" path="ACL-ISN-2025-Bug_Busters/target/classes"/>
 </classpath>
