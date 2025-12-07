@@ -8,7 +8,9 @@ public class Tresor {
     public Tresor(Position pos) {
         this.pos = pos;
     }
-
+    
+    //retourne la position du trésor
     public Position getPos() { return pos; }
+    //setter de la position du tresor
     public void setPos(Position pos) { this.pos = pos; }
 }

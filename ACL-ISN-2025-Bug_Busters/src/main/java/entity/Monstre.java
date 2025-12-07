@@ -8,10 +8,12 @@ public class Monstre {
     private Position position;
     private Random rand = new Random();
 
+    //constructeur qui place un monstre à une position donnée
     public Monstre(Position pos) {
         this.position = pos;
     }
-
+    
+    //constructeur qui place un monstre aléatoirement dans la grille en évitant la position du héros
     public Monstre(int gridWidth, int gridHeight, int heroX, int heroY) {
         int x, y;
         do {
@@ -20,22 +22,15 @@ public class Monstre {
         } while (x == heroX && y == heroY);
         position = new Position(x, y);
     }
-
-    // ⭐️ OBLIGATOIRE : getter
+    
+    //retourne la position actuelle du monstre
     public Position getPos() {
         return position;
     }
-
-    // ⭐️ OBLIGATOIRE : setter
+    
+    //changer la position actuelle du monstre
     public void setPos(Position pos) {
         this.position = pos;
     }
 
-    public Position getPosition() {
-        return position;
-    }
-
-    public void move(int gridWidth, int gridHeight) {
-        // la logique est gérée ailleurs
-    }
 }

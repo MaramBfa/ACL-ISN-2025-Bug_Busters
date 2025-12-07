@@ -7,7 +7,7 @@ public class Ghost {
     private Position pos;
     private Random rand = new Random();
 
-    public Ghost(Position pos) { this.pos = pos; }
+    public Ghost(Position pos) { this.pos = pos;}
 
     public Position getPos() { return pos; }
 
@@ -15,18 +15,19 @@ public class Ghost {
         int dir = rand.nextInt(4);
         int newX = pos.x;
         int newY = pos.y;
-
+        
+        //deplacement 
         switch (dir) {
-            case 0 -> newX--; // Haut
-            case 1 -> newX++; // Bas
-            case 2 -> newY--; // Gauche
-            case 3 -> newY++; // Droite
+            case 0 -> newX--; //dépacement en haut
+            case 1 -> newX++; //déplacement en bas
+            case 2 -> newY--; //déplacement à gauche
+            case 3 -> newY++; //déplacement à droite
         }
 
-        // Le fantôme peut traverser les murs : on ne teste QUE les limites
+        //le fontome c'est le seul qui peut traverser les murs donc il faut juste verifier les bords
         if (newX >= 0 && newX < height && newY >= 0 && newY < width) {
-            pos.x = newX;
-            pos.y = newY;
+            pos.x= newX;
+            pos.y= newY;
         }
     }
 }
