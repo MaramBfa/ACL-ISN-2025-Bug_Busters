@@ -1,12 +1,4 @@
 
-Nouveau comportement du monstre 
-
-	-Coopération : deux monstres qui se déplacent ensemble pour piéger le héros.
-
-Capacités spéciales
-
-	-Monstre qui vole la clé : oblige le joueur à le vaincre pour récupérer l’accès au niveau suivant mais que a partir du 8eme niveau .
-
 Effets visuels et sonores
 
 	-Animation d’attaque : griffes, projectiles ou aura lumineuse.
@@ -19,5 +11,6 @@ Héros plus vivant
 	-Changement de direction de vue : sprite du héros qui s’oriente selon la direction (haut, bas, gauche, droite).
 
 Ajouter des tests unitaires 
+
 
 
