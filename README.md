@@ -1,7 +1,9 @@
 **Équipe Bug Busters
 
 La Quête du Trésor Caché est un projet réalisé en collaboration par :
-    
+  Développeurs : -Aya BENHILAL               -Maram BOUFAROUA 
+                 -Ibtissam EDDADSI           -Amina NOUKRA
+      
   Encadrant : -Horatiu CIRSTEA 
       
   Année : ISN 2025
