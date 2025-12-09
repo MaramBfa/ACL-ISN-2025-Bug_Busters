@@ -18,10 +18,12 @@ La Quête du Trésor Caché est un projet réalisé en collaboration par :
        cd C:\Users\DELL\Desktop\ACL-ISN-2025-Bug_Busters\ACL-ISN-2025-Bug_Busters
    
   3. Compiler le projet
-   mvn clean compile
+     
+         mvn clean compile
 
 5. Lancer le jeu
-   mvn exec:java
+   
+       mvn exec:java
    
 **Environnement de développement
 
