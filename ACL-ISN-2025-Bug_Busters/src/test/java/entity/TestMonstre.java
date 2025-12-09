@@ -15,7 +15,7 @@ class TestMonstre {
         assertEquals(3, monstre.getPos().x);
         assertEquals(3, monstre.getPos().y);
     }
-    
+//tester la position du monstre    
     @Test
     void testSetPosition() {
         Monstre monstre = new Monstre(new Position(1, 1));
