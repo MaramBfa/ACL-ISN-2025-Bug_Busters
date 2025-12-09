@@ -1,0 +1,15 @@
+Rétrospective – Sprint 4 : Jeu du Labyrinthe
+
+
+Ce dernier sprint a été consacré à la finalisation du jeu, en se concentrant sur le polish et la qualité du code. Les principales réalisations 
+incluent l'amélioration du Héros grâce au changement de direction de vue,l'intégration d'animations d'attaque et d'effets sonores complets,
+ et l'ajout crucial de tests unitaires pour stabiliser le projet avant la livraison.
+
+Malgré la forte contrainte de temps inhérente à cette phase finale, la communication et la collaboration ont été exceptionnellement efficaces.
+ L'équipe a su maintenir un focus extrême sur les priorités  et prendre rapidement la décision de retirer les fonctionnalités d'IA complexes
+  (Coopération des monstres, Voleur de Clé) qui auraient menacé la stabilité du projet final. Les échanges ont été directs et concis, 
+  permettant une intégration rapide des assets visuels et sonores sans frictions majeures.
+
+
+Le bilan est très positif : l'équipe a fait preuve de résilience et de pragmatisme, livrant un jeu complet, stable, et agréable à jouer, 
+tout en renforçant son efficacité collective sous pression.

@@ -1,0 +1,32 @@
+Ce dernier Sprint a finalisé l'expérience utilisateur en polissant les interactions clés et l'ambiance : 
+le Héros est plus vivant grâce au changement de direction de vue, le jeu intègre des animations d'attaque et des effets sonores complets, 
+et la qualité du code a été renforcée par l'ajout de tests unitaires.
+
+
+###Fonctionnalités Réalisées
+
+Les éléments suivants du backlog ont été complétés avec succès et sont prêts à être intégrés dans la prochaine version du jeu :
+
+  -Effets visuels et sonores :
+
+Animation d’attaque : Implémentation réussie des effets visuels d'attaque (griffes, projectiles ou aura lumineuse) lors de l'utilisation des armes par le Héros.
+
+ -Effets sonores : Ajout des sons de jeu, notamment les rugissements des monstres à l'apparition et les bruits de pas lorsqu'ils se déplacent.
+
+ -Héros plus vivant :
+
+Changement de direction de vue : Le sprite du Héros s'oriente désormais correctement selon la direction du mouvement (haut, bas, gauche, droite),
+ améliorant l'immersion et la lisibilité des actions.
+
+  -Ajouter des tests unitaires : Des tests unitaires ont été ajoutés, notamment pour les classes d'entités de base comme Héro et Monstre,
+   afin de garantir la fiabilité des fonctionnalités principales du jeu.
+   
+   
+###Fonctionnalités Non Réalisées
+
+Les deux fonctionnalités avancées de comportement de monstre ont été officiellement retirées du scope du projet pour ce jeu final,
+ principalement en raison de contraintes de performance liées à la taille du labyrinthe et au nombre de monstres.
+
+    -Coopération des monstres.
+
+    -Monstre qui vole la clé (à partir du niveau 8).
