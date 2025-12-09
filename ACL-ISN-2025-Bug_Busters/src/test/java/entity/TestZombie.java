@@ -5,102 +5,151 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TestZombie {
-
+    
     @Test
     void testZombieCreation() {
-        // juste vérifier que le zombie garde bien la position donnée
         Position pos = new Position(5, 5);
         Zombie zombie = new Zombie(pos);
-
+        
         assertEquals(pos, zombie.getPos());
     }
-
+    
     @Test
     void testMoveTowardsHeroProche() {
-        // quand le héros est à distance < 3, le zombie doit avancer vers lui
         Zombie zombie = new Zombie(new Position(5, 5));
-        Position hero = new Position(5, 3); // distance = 2
-
+        Position hero = new Position(5, 3); // Distance = 2 (< 3)
+        
         char[][] grille = new char[10][10];
-        for (char[] row : grille) java.util.Arrays.fill(row, ' ');
-
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                grille[i][j] = ' ';
+            }
+        }
+        
         zombie.moveTowards(hero, grille);
-
-        // il avance d’une case vers le héros
+        
+        // Doit se déplacer vers le héros (de 5,5 à 5,4)
         assertEquals(5, zombie.getPos().x);
         assertEquals(4, zombie.getPos().y);
     }
-
+    
     @Test
     void testMoveTowardsHeroLoin() {
-        // si le héros est trop loin, le zombie ne bouge pas
         Zombie zombie = new Zombie(new Position(5, 5));
-        Position hero = new Position(10, 10); // distance > 3
-
+        Position hero = new Position(10, 10); // Distance > 3
+        
         char[][] grille = new char[15][15];
-        for (char[] row : grille) java.util.Arrays.fill(row, ' ');
-
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++) {
+                grille[i][j] = ' ';
+            }
+        }
+        
         zombie.moveTowards(hero, grille);
-
-        // il reste immobile
+        
+        // Ne doit pas bouger (trop loin)
         assertEquals(5, zombie.getPos().x);
         assertEquals(5, zombie.getPos().y);
     }
-
+    
     @Test
     void testMoveTowardsMur() {
-        // le zombie ne doit pas passer à travers un mur
         Zombie zombie = new Zombie(new Position(5, 5));
         Position hero = new Position(5, 4);
-
+        
         char[][] grille = new char[10][10];
-        for (char[] row : grille) java.util.Arrays.fill(row, ' ');
-
-        grille[5][4] = '#'; // mur juste devant
-
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                grille[i][j] = ' ';
+            }
+        }
+        grille[5][4] = '#'; // Mur devant
+        
         zombie.moveTowards(hero, grille);
-
-        // il ne bouge pas car bloqué par un mur
+        
+        // Ne peut pas traverser le mur
         assertEquals(5, zombie.getPos().x);
         assertEquals(5, zombie.getPos().y);
     }
+    
+    // ============ TESTS DE DÉTECTION DE BUGS ============
+    
+    @Test
+    void testBugZombieSurCaseHero() {
+        System.out.println("=== DÉTECTION BUG: Zombie sur case héros ===");
+        
+        Zombie zombie = new Zombie(new Position(5, 5));
+        Position hero = new Position(4, 5); // Juste au-dessus
+        
+        char[][] grille = new char[10][10];
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                grille[i][j] = ' ';
+            }
+        }
+        
+        // Le zombie devrait se déplacer vers le héros
+        zombie.moveTowards(hero, grille);
+        
+        // BUG POTENTIEL: Le zombie ne devrait PAS se mettre sur la case du héros
+        // Ce test vérifie qu'il s'arrête à la case adjacente
+        assertFalse(zombie.getPos().x == hero.x && zombie.getPos().y == hero.y,
+        	    "BUG: Zombie ne devrait pas se mettre sur la case du héros");
 
+    }
+    
     @Test
     void testBugZombieDeplacementHorsLimites() {
-        // le zombie ne doit pas sortir de la grille
+        System.out.println("=== DÉTECTION BUG: Zombie hors limites ===");
+        
+        // Zombie en bordure
         Zombie zombie = new Zombie(new Position(0, 5));
-        Position hero = new Position(2, 5);
-
+        Position hero = new Position(2, 5); // En dessous
+        
         char[][] grille = new char[10][10];
-        for (char[] row : grille) java.util.Arrays.fill(row, ' ');
-
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                grille[i][j] = ' ';
+            }
+        }
+        
         zombie.moveTowards(hero, grille);
-
-        assertTrue(zombie.getPos().x >= 0);
-        assertTrue(zombie.getPos().x < 10);
+        
+        // Le zombie ne devrait pas sortir de la grille
+        assertTrue(zombie.getPos().x >= 0, 
+            "BUG: Zombie ne devrait pas sortir de la grille (X négatif)");
+        assertTrue(zombie.getPos().x < 10,
+            "BUG: Zombie ne devrait pas sortir de la grille (X trop grand)");
     }
-
+    
     @Test
     void testBugZombieDistanceCalculation() {
-        // juste vérifier que la logique distance < 3 fonctionne bien
+        System.out.println("=== DÉTECTION BUG: Calcul distance zombie ===");
+        
         Zombie zombie = new Zombie(new Position(0, 0));
-        Position heroProche = new Position(0, 2); // distance 2 → doit bouger
-        Position heroLoin = new Position(2, 2);   // distance 4 → ne bouge pas
-
+        Position hero1 = new Position(0, 2); // Distance 2
+        Position hero2 = new Position(2, 2); // Distance 4
+        
         char[][] grille = new char[10][10];
-        for (char[] row : grille) java.util.Arrays.fill(row, ' ');
-
-        // cas héros proche
-        zombie.moveTowards(heroProche, grille);
-        boolean aBouge = !(zombie.getPos().x == 0 && zombie.getPos().y == 0);
-        assertTrue(aBouge, "le zombie doit bouger si la distance < 3");
-
-        // reset
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                grille[i][j] = ' ';
+            }
+        }
+        
+        // Avec héros à distance 2 (<3) -> devrait bouger
+        zombie.moveTowards(hero1, grille);
+        assertNotEquals(0, zombie.getPos().x + zombie.getPos().y,
+            "BUG: Zombie devrait bouger vers héros proche (distance < 3)");
+        
+        // Reset zombie
         zombie = new Zombie(new Position(0, 0));
-
-        // cas héros loin
-        zombie.moveTowards(heroLoin, grille);
-        assertEquals(0, zombie.getPos().x);
-        assertEquals(0, zombie.getPos().y);
+        
+        // Avec héros à distance 4 (>=3) -> ne devrait pas bouger
+        zombie.moveTowards(hero2, grille);
+        assertEquals(0, zombie.getPos().x,
+            "BUG: Zombie ne devrait pas bouger vers héros loin (distance >= 3)");
+        assertEquals(0, zombie.getPos().y,
+            "BUG: Zombie ne devrait pas bouger vers héros loin (distance >= 3)");
     }
 }
