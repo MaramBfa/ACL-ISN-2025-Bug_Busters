@@ -7,7 +7,6 @@ public class Position {
         this.x = x;
         this.y = y;
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -15,7 +14,6 @@ public class Position {
         Position position = (Position) o;
         return x == position.x && y == position.y;
     }
-
     @Override
     public int hashCode() {
         return 31 * x + y;

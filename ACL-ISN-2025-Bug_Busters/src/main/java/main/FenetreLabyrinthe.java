@@ -12,6 +12,9 @@ import entity.Weapon;
 import entity.WeaponType;
 import simple.Position;
 import simple.Level;
+import entity.Boss;
+import entity.BossClone;
+
 
 //importation des librairies swing pour l'affichage et la fenêtre du jeu
 import javax.swing.JPanel;
@@ -40,13 +43,13 @@ public class FenetreLabyrinthe extends JPanel {
     private static final long serialVersionUID = 1L;
 
 
-    	/**
-    	 * petite classe interne qui regroupe les chemins des images :
-    	 * une image png pour le sol
-    	 * une image png pour les murs
-    	 * chaque niveau utilise un thème différent pour donner un style visuel différent 
-    	 */   
-    	private static class Theme {
+        /**
+         * petite classe interne qui regroupe les chemins des images :
+         * une image png pour le sol
+         * une image png pour les murs
+         * chaque niveau utilise un thème différent pour donner un style visuel différent 
+         */   
+        private static class Theme {
         final String floorPath; //chemin de l'image du sol
         final String wallPath;//chemin de l'image du mur
 
@@ -92,6 +95,10 @@ public class FenetreLabyrinthe extends JPanel {
     private Ghost fantome; //un seul fantôme à la fois
     private Zombie zombie; // un seul zombie à la fois
     private boolean zombieVivant = true;
+    private Boss boss;
+    private ArrayList<BossClone> bossClones = new ArrayList<>();
+    private long bossStartTime = 0;   // moment où commence le combat
+
 
     private final int TAILLE_CASE = 40;//taille d'une case d'une grille
     private Level currentLevel;//level actuel
@@ -106,7 +113,8 @@ public class FenetreLabyrinthe extends JPanel {
     // Sprites entités
     private Image heroLeftImg, heroRightImg;
     private Image monsterImg, ghostImg, zombieImg,
-            keyImg, treasureImg, swordImg, bowImg, heartImg, doorImg;
+            keyImg, treasureImg, swordImg, bowImg, heartImg, doorImg,
+            bossImg, bossCloneImg;
 
     //images des coeurs affichés dans le HUD , coeurs rempli / coeurs vides
     private Image heartFullImg, heartEmptyImg;
@@ -150,8 +158,9 @@ public class FenetreLabyrinthe extends JPanel {
                              Cle cle, Door door, Tresor tresor,
                              ArrayList<Weapon> armes,
                              Ghost fantome, Zombie zombie,
-                             Level level, ArrayList<Heart> coeurs) {
-    	
+                             Level level, ArrayList<Heart> coeurs,
+                             Boss boss, ArrayList<BossClone> bossClones) {
+        
         //on récupère toutes les informations envoyées par le JeuLAbyrithelauncher
         this.grille = grille;
         this.hero = hero;
@@ -164,6 +173,11 @@ public class FenetreLabyrinthe extends JPanel {
         this.zombie = zombie;
         this.currentLevel = level;
         this.coeurs = coeurs;
+        
+        this.boss = boss;
+        if (bossClones != null) {
+            this.bossClones = bossClones;
+        }
 
         //on adapte le theme selon l'index du niveau
         int levelIndex = Arrays.asList(Level.values()).indexOf(level);
@@ -190,6 +204,8 @@ public class FenetreLabyrinthe extends JPanel {
         bowImg       = loadImage("/images/bow.png");
         heartImg     = loadImage("/images/Coeur.png"); //coeur posé au sol 
         doorImg      = loadImage("/images/door.png");
+        bossImg      = loadImage("/images/boss.png");
+        bossCloneImg = bossImg;
 
         //images pour l'affichage des vies du héros dans le hud
         heartFullImg  = loadImage("/images/heart_full.png");
@@ -315,7 +331,7 @@ public class FenetreLabyrinthe extends JPanel {
                          key == KeyEvent.VK_LEFT ||
                          key == KeyEvent.VK_RIGHT)) {
 
-                	//déplaecment dans la grille
+                    //déplaecment dans la grille
                     hero.deplacer(key, grille[0].length, grille.length, grille);
 
                     //mise à jour direction horizontale pour pouvoir mettre à jour la direction de l'image du hero
@@ -336,17 +352,21 @@ public class FenetreLabyrinthe extends JPanel {
         //timer pour monstre , zombie et fantôme
         timerMonstres = new Timer(500, e -> {
             if (!partieTerminee) {
-                deplacerMonstres(); //déplacement des monstres de couleur violette (monstres normaux)
+                deplacerMonstres();
                 fantome.move(grille[0].length, grille.length, grille);
                 if (zombieVivant) {
                     zombie.moveTowards(new Position(hero.getX(), hero.getY()), grille);
                 }
-                verifierCollisions(); //si le monstre touche le hero
+
+                // === Déplacement du boss et des clones + génération ===
+                gererBossEtClones();
+
+                verifierCollisions();
                 repaint();
             }
         });
         timerMonstres.start();
-
+        bossStartTime = System.currentTimeMillis();
         //on force le panel à recevoir les touches une fois affiché
         SwingUtilities.invokeLater(() -> FenetreLabyrinthe.this.requestFocusInWindow());
     }
@@ -471,6 +491,43 @@ public class FenetreLabyrinthe extends JPanel {
             Sound.play("/sounds/ghost_pass.wav");
             setMessageHUD("👻 Le fantôme est invincible !");
         }
+        
+        // --- Boss au corps-à-corps ---
+        if (boss != null && boss.isAlive()) {
+            int dxB = boss.getPos().x - hx;
+            int dyB = boss.getPos().y - hy;
+            if (Math.abs(dxB) <= 1 && Math.abs(dyB) <= 1) {
+                boss.takeDamage(1);
+                cibleTouchee = true;
+                if (!boss.isAlive()) {
+                    hero.ajouterScore(200);
+                    setMessageHUD("💥 Boss vaincu !");
+                    // On peut réutiliser le son zombie
+                    Sound.play("/sounds/zombie_growl.wav");
+                } else {
+                    setMessageHUD("💥 Boss touché ! HP restant : " + boss.getHp());
+                    Sound.play("/sounds/monster_snarl.wav");
+                }
+            }
+        }
+
+        // --- Clones au corps-à-corps ---
+        ArrayList<BossClone> clonesMort = new ArrayList<>();
+        for (BossClone c : bossClones) {
+            if (!c.isAlive()) continue;
+            int dxC = c.getPos().x - hx;
+            int dyC = c.getPos().y - hy;
+            if (Math.abs(dxC) <= 1 && Math.abs(dyC) <= 1) {
+                c.takeDamage(1);
+                cibleTouchee = true;
+                if (!c.isAlive()) {
+                    hero.ajouterScore(50);
+                    clonesMort.add(c);
+                }
+            }
+        }
+        bossClones.removeAll(clonesMort);
+
 
         if (cibleTouchee) {
             setMessageHUD("🗡️ Coup d'épée réussi !");
@@ -514,7 +571,7 @@ public class FenetreLabyrinthe extends JPanel {
                 Monstre m = monstres.get(i);
                 Position pos = m.getPos();
                 if (pos.x == x && pos.y == y) {
-                	//si oui , on le supprime et on imcrémente le score de 50
+                    //si oui , on le supprime et on imcrémente le score de 50
                     monstres.remove(i);
                     hero.ajouterScore(50);
                     toucheQuelqueChose = true;
@@ -540,6 +597,25 @@ public class FenetreLabyrinthe extends JPanel {
                 aToucheFantome = true;
                 Sound.play("/sounds/ghost_pass.wav");
             }
+            
+            // Boss touché à distance
+            if (boss != null && boss.isAlive()
+                    && boss.getPos().x == x && boss.getPos().y == y) {
+                boss.takeDamage(1);
+                toucheQuelqueChose = true;
+                Sound.play("/sounds/arrow_hit.wav");
+            }
+
+            // Clones touchés à distance
+            for (BossClone c : bossClones) {
+                if (!c.isAlive()) continue;
+                if (c.getPos().x == x && c.getPos().y == y) {
+                    c.takeDamage(1);
+                    toucheQuelqueChose = true;
+                    Sound.play("/sounds/arrow_hit.wav");
+                }
+            }
+
         }
 
         //on affiche la trajéctoire pendant un court instant
@@ -564,6 +640,7 @@ public class FenetreLabyrinthe extends JPanel {
     }
 
     private void verifierCollisions() {
+
         //si la partie est finie on vérifie plus rien pour éviter des actions en retard
         if (partieTerminee) return;
         
@@ -584,17 +661,35 @@ public class FenetreLabyrinthe extends JPanel {
 
         /* 
          * on vérifie d'abord le fantôme, ensuite le zombie, ensuite les monstres normaux
-		 * equals() compare les positions
-		 * si on touche quelque chose alors hit=true et on garde son nom pour le message
+         * equals() compare les positions
+         * si on touche quelque chose alors hit=true et on garde son nom pour le message
          */
         if (peutPrendreDegat) {
-            if (fantome.getPos().equals(heroPos)) {
+
+            // --- boss final ---
+            if (boss != null && boss.isAlive() && boss.getPos().equals(heroPos)) {
+                hit = true;
+                typeEnnemi = "boss";
+            }
+
+            // --- clones du boss ---
+            if (!hit && bossClones != null) {
+                for (BossClone c : bossClones) {
+                    if (c.isAlive() && c.getPos().equals(heroPos)) {
+                        hit = true;
+                        typeEnnemi = "clone";
+                        break;
+                    }
+                }
+            }
+
+            if (!hit && fantome.getPos().equals(heroPos)) {
                 hit = true;
                 typeEnnemi = "fantôme";
-            } else if (zombieVivant && zombie.getPos().equals(heroPos)) {
+            } else if (!hit && zombieVivant && zombie.getPos().equals(heroPos)) {
                 hit = true;
                 typeEnnemi = "zombie";
-            } else {
+            } else if (!hit) {
                 for (Monstre m : monstres) {
                     if (m.getPos().equals(heroPos)) {
                         hit = true;
@@ -603,9 +698,15 @@ public class FenetreLabyrinthe extends JPanel {
                     }
                 }
             }
+
             //chaque ennemi a son bruit quand il touche le héro
             if (hit) {
-                if ("monstre".equals(typeEnnemi)) {
+
+                if ("boss".equals(typeEnnemi)) {
+                    Sound.play("/sounds/monster_snarl.wav");
+                } else if ("clone".equals(typeEnnemi)) {
+                    Sound.play("/sounds/monster_snarl.wav");
+                } else if ("monstre".equals(typeEnnemi)) {
                     Sound.play("/sounds/monster_snarl.wav");
                 } else if ("zombie".equals(typeEnnemi)) {
                     Sound.play("/sounds/zombie_growl.wav");
@@ -631,7 +732,7 @@ public class FenetreLabyrinthe extends JPanel {
 
         //ramassage des coeurs (points de vie)
         for (Heart coeur : coeurs) {
-        	//si on marche sur un cœur non ramassé
+            //si on marche sur un cœur non ramassé
             if (!coeur.estRamassee()
                     && hero.getX() == coeur.getPos().x
                     && hero.getY() == coeur.getPos().y) {
@@ -684,13 +785,13 @@ public class FenetreLabyrinthe extends JPanel {
         if (door != null
                 && hero.getX() == door.getPos().x
                 && hero.getY() == door.getPos().y) {
-        	
-        	//si pas de clé on  ne peut pas sortir
+            
+            //si pas de clé on  ne peut pas sortir
             if (!hero.hasKey()) {
                 setMessageHUD("🔒 Porte verrouillée ! Trouvez la clé d'abord.");
             } else { //si on a la clé on continue
 
-            	//on consomme la clé
+                //on consomme la clé
                 hero.useKey();
 
                 //on arrête lechrono
@@ -713,7 +814,6 @@ public class FenetreLabyrinthe extends JPanel {
             }
         }
 
-
         //au niveau 10 il y a un trésor à ramasser pour finir le jeu
         if (tresor != null
                 && hero.getX() == tresor.getPos().x
@@ -724,7 +824,6 @@ public class FenetreLabyrinthe extends JPanel {
             partieTerminee = true;
             hero.ajouterScore(200); // bonus final de 200 points pour le score
             
-
             //coupure de la musique
             Sound.stopMusic();
             Sound.play("/sounds/victory_jingle.wav");
@@ -733,6 +832,7 @@ public class FenetreLabyrinthe extends JPanel {
             JeuLabyrintheLauncher.niveauTermine(hero, finalTime);
         }
     }
+
 
     //affiche un message dans le hud pendant quelques secondes
     public void setMessageHUD(String message) {
@@ -788,7 +888,7 @@ public class FenetreLabyrinthe extends JPanel {
     }
 
     private void finDePartie(String message, String titre) {
-    	
+        
         //on arrête tous les timers pour figer le jeu quand la partie se termine
         timerMonstres.stop();
         chronoTimer.stop();
@@ -805,7 +905,7 @@ public class FenetreLabyrinthe extends JPanel {
                 "Voulez-vous revenir au menu principal ?",
                 "Fin du Jeu", JOptionPane.YES_NO_OPTION);
         if (choix == JOptionPane.YES_OPTION) {
-        	//on récupère la fenêtre principale (le JFrame)
+            //on récupère la fenêtre principale (le JFrame)
             JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
             //on ferme la fenêtre du jeu
             if (parentFrame != null) parentFrame.dispose();
@@ -813,7 +913,7 @@ public class FenetreLabyrinthe extends JPanel {
             //on rentourne au menu principal pour recommencer
             MenuPrincipal.lancerNouvellePartie();
         } else {
-        	//si on dit non, ça ferme complètement le programme
+            //si on dit non, ça ferme complètement le programme
             System.exit(0);
         }
     }
@@ -826,7 +926,7 @@ public class FenetreLabyrinthe extends JPanel {
         try {
             java.net.URL url = getClass().getResource(path);
             if (url != null) {
-            	//on charge l'image du niveau terminé(à chaque niveau on a une sorte de map pour afficher ou est ce qu'one st dans le jeu
+                //on charge l'image du niveau terminé(à chaque niveau on a une sorte de map pour afficher ou est ce qu'one st dans le jeu
                 Image img = new ImageIcon(url).getImage();
                 
                 //fixation d'une taille max pour ne pas dépasser l'écran
@@ -859,7 +959,7 @@ public class FenetreLabyrinthe extends JPanel {
                 icon = new ImageIcon(resized);
                 
             } else {
-            	//on affiche un messgae d'eeure si l'image n'existe pas
+                //on affiche un messgae d'eeure si l'image n'existe pas
                 System.err.println("❌ Image introuvable : " + path);
             }
         } catch (Exception e) {
@@ -881,18 +981,172 @@ public class FenetreLabyrinthe extends JPanel {
                 options[0]
         );
     }
+    
 
+    private void gererBossEtClones() {
+        if (boss == null || !boss.isAlive()) {
+            // Même si le boss est mort, les clones existants continuent de bouger
+            deplacerClones();
+            return;
+        }
+
+        //déplacement du boss vers le héros
+        deplacerBossVersHero();
+
+        //déplacement des clones
+        deplacerClones();
+
+        //destion du nombre de clones selon le temps
+        long elapsedSec = (System.currentTimeMillis() - bossStartTime) / 1000;
+
+        int expectedClones = 1; // dès le début : 1 clone
+        if (elapsedSec >= 30) {
+            expectedClones = 3;
+        } else if (elapsedSec >= 15) {
+            expectedClones = 2;
+        }
+
+        //on recrée des clones si on en a perdu (ou pas encore atteint le quota)
+        while (bossClones.size() < expectedClones) {
+            creerClonePresDuBoss();
+        }
+
+        //on nettoie les clones morts
+        bossClones.removeIf(c -> !c.isAlive());
+    }
+
+    private void deplacerBossVersHero() {
+        if (boss == null || !boss.isAlive()) return;
+
+        Position bPos = boss.getPos();
+        int bx = bPos.x;
+        int by = bPos.y;
+
+        int hx = hero.getX();
+        int hy = hero.getY();
+
+        int bestX = bx;
+        int bestY = by;
+        int bestDist = distanceManhattan(bx, by, hx, hy);
+
+        int[][] dirs = { {-1,0},{1,0},{0,-1},{0,1} };
+        for (int[] d : dirs) {
+            int nx = bx + d[0];
+            int ny = by + d[1];
+            if (!estCaseLibre(nx, ny)) continue;
+            int dist = distanceManhattan(nx, ny, hx, hy);
+            if (dist < bestDist) {
+                bestDist = dist;
+                bestX = nx;
+                bestY = ny;
+            }
+        }
+
+        boss.setPos(new Position(bestX, bestY));
+    }
+
+    private void deplacerClones() {
+        if (bossClones == null) return;
+        int hx = hero.getX();
+        int hy = hero.getY();
+
+        for (BossClone clone : bossClones) {
+            if (!clone.isAlive()) continue;
+
+            Position cPos = clone.getPos();
+            int cx = cPos.x;
+            int cy = cPos.y;
+
+            int bestX = cx;
+            int bestY = cy;
+            int bestDist = distanceManhattan(cx, cy, hx, hy);
+
+            int[][] dirs = { {-1,0},{1,0},{0,-1},{0,1} };
+            for (int[] d : dirs) {
+                int nx = cx + d[0];
+                int ny = cy + d[1];
+                if (!estCaseLibre(nx, ny)) continue;
+                int dist = distanceManhattan(nx, ny, hx, hy);
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    bestX = nx;
+                    bestY = ny;
+                }
+            }
+
+            clone.setPos(new Position(bestX, bestY));
+        }
+    }
+
+    private int distanceManhattan(int x1, int y1, int x2, int y2) {
+        return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+    }
+
+    private boolean estCaseLibre(int x, int y) {
+        if (x < 0 || x >= grille.length || y < 0 || y >= grille[0].length) return false;
+        if (grille[x][y] == '#') return false;
+
+        // On évite de rentrer dans le héros
+        if (hero.getX() == x && hero.getY() == y) return false;
+
+        // On évite les monstres
+        for (Monstre m : monstres) {
+            if (m.getPos().x == x && m.getPos().y == y) return false;
+        }
+
+        // On évite fantôme + zombie
+        if (fantome.getPos().x == x && fantome.getPos().y == y) return false;
+        if (zombieVivant && zombie.getPos().x == x && zombie.getPos().y == y) return false;
+
+        // On évite le boss
+        if (boss != null && boss.isAlive()) {
+            if (boss.getPos().x == x && boss.getPos().y == y) return false;
+        }
+
+        // On évite les autres clones
+        for (BossClone c : bossClones) {
+            if (c.isAlive() && c.getPos().x == x && c.getPos().y == y) return false;
+        }
+
+        return true;
+    }
+
+    private void creerClonePresDuBoss() {
+        if (boss == null || !boss.isAlive()) return;
+        Position bPos = boss.getPos();
+
+        // Cases autour du boss
+        int[][] dirs = { {-1,0},{1,0},{0,-1},{0,1} };
+        java.util.List<int[]> possibles = new ArrayList<>();
+        for (int[] d : dirs) {
+            int nx = bPos.x + d[0];
+            int ny = bPos.y + d[1];
+            if (estCaseLibre(nx, ny)) {
+                possibles.add(new int[]{nx, ny});
+            }
+        }
+
+        if (possibles.isEmpty()) return;
+
+        // Choix aléatoire parmi les cases libres autour du boss
+        int[] chosen = possibles.get(new Random().nextInt(possibles.size()));
+        BossClone clone = new BossClone(new Position(chosen[0], chosen[1]), 1);
+        bossClones.add(clone);
+    }
+
+    
+    
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         
-      //on utilise Graphics2D pour avoir plus d’options de dessin
+        //on utilise Graphics2D pour avoir plus d’options de dessin
         Graphics2D g2 = (Graphics2D) g;
 
         for (int i = 0; i < grille.length; i++) {
             for (int j = 0; j < grille[0].length; j++) {
-            	
-            	//on dessine toujours le sol en premier
+                
+                //on dessine toujours le sol en premier
                 g2.drawImage(tileFloor,
                         j * TAILLE_CASE,
                         i * TAILLE_CASE,
@@ -960,6 +1214,24 @@ public class FenetreLabyrinthe extends JPanel {
                     zombie.getPos().x * TAILLE_CASE, null);
         }
 
+        //boss final
+        if (boss != null && boss.isAlive()) {
+            Position bp = boss.getPos();
+            g2.drawImage(bossImg, bp.y * TAILLE_CASE,
+                         bp.x * TAILLE_CASE, null);
+        }
+
+        //les clones du boss
+        if (bossClones != null) {
+            for (BossClone c : bossClones) {
+                if (c.isAlive()) {
+                    Position cp = c.getPos();
+                    g2.drawImage(bossCloneImg, cp.y * TAILLE_CASE,
+                                 cp.x * TAILLE_CASE, null);
+                }
+            }
+        }
+
         //on choisit le sprite selon si le héros regarde à gauche ou à droite
         Image heroImgToDraw =
                 "left".equals(lastHorizontalDirection) ? heroLeftImg : heroRightImg;
@@ -979,7 +1251,7 @@ public class FenetreLabyrinthe extends JPanel {
                 g2.fillRect(px, py, size, size);
             }
         } else if (!arrowTrail.isEmpty() && now - arrowTrailTime >= DUREE_TRAJECTOIRE_FLECHE) {
-        	//au bout de quelques ms on efface la trajectoire (après DUREE_TRAJECTOIRE_FLECHE)
+            //au bout de quelques ms on efface la trajectoire (après DUREE_TRAJECTOIRE_FLECHE)
             arrowTrail.clear();
         }
 
@@ -991,7 +1263,7 @@ public class FenetreLabyrinthe extends JPanel {
             g2.setColor(new Color(255, 0, 0, 120));
             g2.fillOval(hx - 5, hy - 5, TAILLE_CASE + 10, TAILLE_CASE + 10);
         } else if (animationAttaque && now - timeAttaque >= DUREE_ATTAQUE) {
-        	//on coupe l'effet quand le temps est écoulé
+            //on coupe l'effet quand le temps est écoulé
             animationAttaque = false;
         }
 
@@ -1031,7 +1303,7 @@ public class FenetreLabyrinthe extends JPanel {
         //si le héros a une clé → on affiche une clé, sinon on affiche un croix
         g2.drawString("Clé : " + (hero.hasKey() ? "🔑" : "❌"), 620, hudY);
         
-       //on affiche combien de coeurs on peut ramasser restent dans cette partie sur la carte
+        //on affiche combien de coeurs on peut ramasser restent dans cette partie sur la carte
         g2.drawString("Cœurs: " + getCoeursRestants() + "/" + coeurs.size(), 700, hudY);
 
         //message HUD
@@ -1051,6 +1323,7 @@ public class FenetreLabyrinthe extends JPanel {
         //on dessine la mini map des niveaux juste en dessous du hud
     }
 
+
     private void dessinerCarteGlobale(Graphics g, int mapY) {
         Level[] allLevels = Level.values();
         //currentLevelIndex coorespond au le numéro du niveau actuel 
@@ -1064,13 +1337,13 @@ public class FenetreLabyrinthe extends JPanel {
       //boucle qui dessine un cercle pour chaque niveau 
         for (int i = 0; i < allLevels.length; i++) {
             if (i < currentLevelIndex) {
-            	//gris pour niveau terminé
+                //gris pour niveau terminé
                 g.setColor(Color.LIGHT_GRAY);
             } else if (i == currentLevelIndex) {
-            	//rouge niveau courant
+                //rouge niveau courant
                 g.setColor(Color.RED);
             } else {
-            	//on dessine un cercle gris foncé pour les niveaux pas encore atteints
+                //on dessine un cercle gris foncé pour les niveaux pas encore atteints
                 g.setColor(Color.DARK_GRAY);
             }
 

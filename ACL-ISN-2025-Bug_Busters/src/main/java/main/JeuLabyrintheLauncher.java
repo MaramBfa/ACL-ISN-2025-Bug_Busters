@@ -10,6 +10,8 @@ import entity.WeaponType;
 import entity.Ghost;
 import entity.Zombie;
 import entity.Monstre;
+import entity.Boss;
+import entity.BossClone;
 import simple.Position;
 import simple.Level;
 
@@ -37,9 +39,9 @@ public class JeuLabyrintheLauncher {
     public static void lancerNouveauNiveau(Heros herosStats) {
 
         Level currentLevelEnum = getLevelEnum(niveauActuel); //on récupere les infos sur le niveau(taille , nombre de monstres, nombre ce coeurs,carte..)
-
+        Sound.stopMusic();  
         if (currentLevelEnum == null) {
-        	//si on dépasse le nombre max de niveaux alors on annonce la fin du jeu
+            //si on dépasse le nombre max de niveaux alors on annonce la fin du jeu
             JOptionPane.showMessageDialog(null,
                 "FIN DU JEU ! Tous les niveaux sont terminés.",
                 "Victoire Totale", JOptionPane.INFORMATION_MESSAGE);
@@ -203,6 +205,20 @@ public class JeuLabyrintheLauncher {
         Zombie zombie = new Zombie(posZombie);
         occupees.add(posZombie);
 
+        // boss final (niveau 10 uniquement)
+        Boss boss = null;
+        ArrayList<BossClone> bossClones = new ArrayList<>();
+
+        if (niveauActuel == 10) {
+            Position posBoss = laby.placerLoinDeAccessible(
+                    centre, 10,
+                    new HashSet<>(occupees),
+                    accessibles
+            );
+            boss = new Boss(posBoss, 5);
+            occupees.add(posBoss);
+        }
+
         //creer la fenetre du niveau
         JFrame frame = new JFrame("Labyrinthe - Niveau " + niveauActuel +
                 " (" + currentLevelEnum.nbCoeurs + " ❤️)");
@@ -213,17 +229,20 @@ public class JeuLabyrintheLauncher {
         //on cree le panneau du jeu (qui gère tout le gameplay)
         FenetreLabyrinthe panel = new FenetreLabyrinthe(
                 grille,
-                heros,
+                heros,          // le héros que tu as créé plus haut
                 monstres,
                 cle,
-                porte,
-                tresor,
+                porte,          // la porte que tu as créée plus haut
+                tresor,         // null sauf au niveau 10
                 armes,
                 fantome,
                 zombie,
                 currentLevelEnum,
-                coeurs
+                coeurs,
+                boss,
+                bossClones
         );
+
 
         heros.setFenetreActuelle(panel);  //permet au héro de savoir dans quelle fenêtre il est actuellement (utile pour fin de la partie)
 
@@ -250,8 +269,8 @@ public class JeuLabyrintheLauncher {
 
     //fonction qu'on appelle quand le joueur termine un niveau
     public static void niveauTermine(Heros hero, long finalTime) {
-    	
-    	//on ferme la fenêtre du niveau terminé
+        
+        //on ferme la fenêtre du niveau terminé
         JFrame oldFrame = (JFrame) SwingUtilities.getWindowAncestor(hero.getFenetreActuelle());
         if (oldFrame != null) oldFrame.dispose();
 

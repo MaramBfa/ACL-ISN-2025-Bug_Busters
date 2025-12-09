@@ -42,26 +42,28 @@ public class MenuPrincipal extends JFrame {
         instructionsButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this,
                 "🎯 OBJECTIF :\n"
-                + "• Trouve la CLÉ 🗝️ puis la PORTE 🚪 pour passer au niveau suivant\n"
-                + "• Niveau 10 : Trouve le TRÉSOR 🏆\n\n"
+                + "• Trouver la CLÉ 🗝️ puis la PORTE 🚪 pour passer au niveau suivant\n"
+                + "• Niveau 10 : récupérer le TRÉSOR 🏆 pour gagner la partie\n\n"
                 + "💖 SANTÉ :\n"
-                + "• Départ avec 3 vies ❤️❤️❤️ (max 5 vies)\n"
-                + "• Des cœurs supplémentaires apparaissent dans certains niveaux\n\n"
+                + "• Départ avec 3 vies ❤️❤️❤️ (jusqu'à 5 maximum)\n"
+                + "• Certains niveaux contiennent des cœurs supplémentaires\n\n"
                 + "⚔️ ARMES :\n"
-                + "• Tu peux posséder l'ÉPÉE ET l'ARC en même temps\n"
-                + "• Chaque arme peut être utilisée UNE SEULE FOIS\n"
-                + "  - Épée : attaque au corps-à-corps dans une zone d'une case autour de toi\n"
-                + "  - Arc : attaque à distance en ligne droite jusqu'au mur\n\n"
+                + "• Tu peux avoir l'ÉPÉE et l'ARC en même temps\n"
+                + "• Chaque arme = 1 seule utilisation\n"
+                + "  - Épée : attaque autour du héros (corps-à-corps)\n"
+                + "  - Arc : tir en ligne droite jusqu'à un mur ou une cible\n\n"
                 + "🎮 CONTRÔLES :\n"
-                + "• ⇧   ⇩   ⇦   ⇨ : se déplacer\n"
-                + "• Barre ESPACE : attaquer avec l'ÉPÉE\n"
-                + "• T puis Z / Q / S / D : tirer une flèche avec l'ARC\n\n"
-                + "👻 ENNEMIS :\n"
-                + "• Monstres : peuvent être tués par l'épée ou l'arc\n"
-                + "• Zombie : te poursuit s'il est proche, tuable aussi\n"
-                + "• Fantôme : traverse les murs et est INVINCIBLE 😈",
+                + "• Flèches ⇧ ⇩ ⇦ ⇨ : déplacement\n"
+                + "• Espace : attaquer avec l'ÉPÉE\n"
+                + "• T puis Flèche : tirer avec l’ARC\n\n"
+                + "👾 ENNEMIS :\n"
+                + "• Monstres : tuables (épée ou arc)\n"
+                + "• Zombie : poursuit le héros, tuable\n"
+                + "• Fantôme : traverse les murs et est INVINCIBLE 👻\n"
+                + "• Niveau 10 : BOSS + clones qui apparaissent avec le temps ⚠️",
                 "Instructions du Jeu", JOptionPane.INFORMATION_MESSAGE);
         });
+
 
         quitterButton.addActionListener(e -> System.exit(0));
 
