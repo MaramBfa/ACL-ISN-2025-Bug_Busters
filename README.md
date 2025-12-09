@@ -2,9 +2,6 @@
 
 La Quête du Trésor Caché est un projet réalisé en collaboration par :
     
-  Développeurs : -Aya BENHILAL                -Amina NOUKRA
-                 -Maram BOUFAROUA             -Ibtissam EDDADSI
-      
   Encadrant : -Horatiu CIRSTEA 
       
   Année : ISN 2025
